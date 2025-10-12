@@ -1,5 +1,4 @@
 _G.FastAttack = true
-
 if _G.FastAttack then
     local _ENV = (getgenv or getrenv or getfenv)()
 
@@ -12,7 +11,7 @@ if _G.FastAttack then
         end
         return result
     end
-
+    
     local function WaitChilds(path, ...)
         local last = path
         for _, child in {...} do
