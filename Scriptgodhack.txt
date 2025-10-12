@@ -2364,17 +2364,17 @@ Tabs.Info:AddButton({
         end
 })
 Tabs.Info:AddButton({
-    Title="Ten Nguoi Lam",
-    Description="Youtube",
+    Title="eohackgame",
+    Description="youtube",
     Callback=function()
-        setclipboard(tostring("https://www.youtube.com/"))
+        setclipboard(tostring("https://www.youtube.com/eohackgame"))
     end
 })
 Tabs.Info:AddButton({
-    Title="Fb Nguoi Lam",
-    Description="Facebook",
+    Title="hacker666a",
+    Description="tik tok",
     Callback=function()
-        setclipboard(tostring("https://www.facebook.com/"))
+        setclipboard(tostring("https://www.tiktok.com/@hacker666a?_t=ZS-90UGI1eQ8OI&_r=1"))
     end
 })
 Tabs.Info:AddParagraph({
@@ -8490,23 +8490,35 @@ Tabs.Shop:AddButton({
     end
 })
 Tabs.Shop:AddButton({
-    Title="Race Draco",
-    Description="Sea 3",
-    Callback=function()
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438,-334.9649963378906))
+    Title = "Race Draco",
+    Description = "Sea 3",
+    Callback = function()
+        local ThirdSea = 7449423635
+        local currentPlace = game.PlaceId
+
+        if currentPlace ~= ThirdSea then
+            warn("Not in Third Sea.")
+            return
+        end
+
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, -334.9649963378906))
         Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938))
+
         local targetPosition = Vector3.new(5814.42724609375, 1208.3267822265625, 884.5785522460938)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
+
         repeat
-            wait()
-        until (character.HumanoidRootPart.Position-targetPosition).Magnitude<1
+            task.wait()
+        until (character.HumanoidRootPart.Position - targetPosition).Magnitude < 1
+
         local args = {
-            [1]={
-                ["NPC"]="Dragon Wizard",
-                ["Command"]="DragonRace"
+            [1] = {
+                ["NPC"] = "Dragon Wizard",
+                ["Command"] = "DragonRace"
             }
         }
+
         game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/InteractDragonQuest"):InvokeServer(unpack(args))
     end
 })
