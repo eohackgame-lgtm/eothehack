@@ -1,3 +1,203 @@
+-- 本地变量
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- 预定义的密钥（在实际使用中应该更安全地存储）
+local validKeys = {
+    "FRUIT123",
+    "BLOX2024", 
+    "SECRETKEY",
+    "ADMINPASS"
+}
+
+-- 创建主界面
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KeyVerificationGui"
+screenGui.Parent = playerGui
+
+-- 创建背景框架
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+-- 圆角效果
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
+
+-- 标题
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 60)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.Text = "Blox Fruits 功能解锁"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = title
+
+-- 说明文本
+local description = Instance.new("TextLabel")
+description.Size = UDim2.new(0.8, 0, 0, 40)
+description.Position = UDim2.new(0.1, 0, 0.2, 0)
+description.BackgroundTransparency = 1
+description.Text = "请输入访问密钥以使用功能"
+description.TextColor3 = Color3.fromRGB(200, 200, 200)
+description.TextScaled = true
+description.Font = Enum.Font.Gotham
+description.Parent = mainFrame
+
+-- 密钥输入框
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0.8, 0, 0, 50)
+keyBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+keyBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+keyBox.PlaceholderText = "在此输入密钥..."
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.TextScaled = true
+keyBox.ClearTextOnFocus = false
+keyBox.Parent = mainFrame
+
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 8)
+boxCorner.Parent = keyBox
+
+-- 提交按钮
+local submitButton = Instance.new("TextButton")
+submitButton.Size = UDim2.new(0.8, 0, 0, 50)
+submitButton.Position = UDim2.new(0.1, 0, 0.65, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+submitButton.Text = "验证密钥"
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.TextScaled = true
+submitButton.Font = Enum.Font.GothamBold
+submitButton.Parent = mainFrame
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 8)
+buttonCorner.Parent = submitButton
+
+-- 状态信息
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0.8, 0, 0, 30)
+statusLabel.Position = UDim2.new(0.1, 0, 0.85, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = ""
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.TextScaled = true
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = mainFrame
+
+-- 按钮点击效果
+submitButton.MouseButton1Click:Connect(function()
+    local enteredKey = keyBox.Text:upper():gsub(" ", "") -- 转换为大写并移除空格
+    
+    if enteredKey == "" then
+        showStatus("请输入密钥！", Color3.fromRGB(255, 100, 100))
+        return
+    end
+    
+    -- 验证密钥
+    if isValidKey(enteredKey) then
+        showStatus("验证成功！正在解锁功能...", Color3.fromRGB(100, 255, 100))
+        successAnimation()
+        
+        -- 延迟后进入主功能
+        wait(2)
+        unlockFeatures()
+    else
+        showStatus("密钥无效，请重试！", Color3.fromRGB(255, 100, 100))
+        shakeAnimation()
+    end
+end)
+
+-- 验证密钥函数
+function isValidKey(key)
+    for _, validKey in pairs(validKeys) do
+        if key == validKey then
+            return true
+        end
+    end
+    return false
+end
+
+-- 显示状态信息
+function showStatus(message, color)
+    statusLabel.Text = message
+    statusLabel.TextColor3 = color
+end
+
+-- 成功动画
+function successAnimation()
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(submitButton, tweenInfo, {
+        BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+    })
+    tween:Play()
+end
+
+-- 失败动画（抖动效果）
+function shakeAnimation()
+    local originalPosition = mainFrame.Position
+    for i = 1, 3 do
+        mainFrame.Position = UDim2.new(0.5, -190, 0.5, -150)
+        wait(0.05)
+        mainFrame.Position = UDim2.new(0.5, -210, 0.5, -150)
+        wait(0.05)
+    end
+    mainFrame.Position = originalPosition
+end
+
+-- 解锁主要功能
+function unlockFeatures()
+    -- 隐藏验证界面
+    screenGui.Enabled = false
+    
+    -- 在这里添加你的主要功能代码
+    print("功能已解锁！")
+    
+    -- 示例：创建功能按钮
+    createFeatureButtons()
+end
+
+-- 创建功能按钮（示例）
+function createFeatureButtons()
+    local featuresGui = Instance.new("ScreenGui")
+    featuresGui.Name = "FeaturesGui"
+    featuresGui.Parent = playerGui
+    
+    -- 这里添加你的具体功能按钮
+    local featureButton = Instance.new("TextButton")
+    featureButton.Size = UDim2.new(0, 200, 0, 50)
+    featureButton.Position = UDim2.new(0, 20, 0, 20)
+    featureButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    featureButton.Text = "主要功能"
+    featureButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    featureButton.TextScaled = true
+    featureButton.Parent = featuresGui
+    
+    featureButton.MouseButton1Click:Connect(function()
+        -- 你的功能代码
+        print("功能已执行！")
+    end)
+end
+
+-- 回车键提交
+keyBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        submitButton:Activate()
+    end
+end)
 _G.FastAttack = true
 if _G.FastAttack then
     local _ENV = (getgenv or getrenv or getfenv)()
