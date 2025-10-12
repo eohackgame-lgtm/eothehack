@@ -2208,7 +2208,7 @@ function AttackNoCoolDown()
                 equippedWeapon.LeftClickRemote:FireServer(direction, attackCount)
             end)
             attackCount = attackCount + 1
-            if attackCount > 90000000000000 then attackCount = 1 end
+            if attackCount > 10000000000000 then attackCount = 1 end
         end
     else
         local targets = {}
@@ -4259,7 +4259,7 @@ Tabs.Sea:AddButton({
     Title="Teleport Boat(fix now)",
     Description="",
     Callback=function()
-        ()
+        tptomyboat()
     end
 })
 local ToggleTerrorshark = Tabs.Sea:AddToggle("ToggleTerrorshark", {Title="Auto Terror Shark", Description="", Default=false})
