@@ -1,12 +1,3 @@
-local password = "K9R7T2M4P8Q1X3Z6B5N0V2"
-rconsoleprint("@@YELLOW@@\n[Protected Script] Please enter password: ")
-local userInput = rconsoleinput()
-if userInput ~= password then
-    rconsoleprint("@@RED@@\nIncorrect password. Script will stop.\n")
-    return
-else
-    rconsoleprint("@@GREEN@@\nAccess granted!\n")
-end
 _G.FastAttack = true
 
 if _G.FastAttack then
