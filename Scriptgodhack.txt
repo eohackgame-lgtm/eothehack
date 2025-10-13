@@ -9341,8 +9341,7 @@ local currentTime = tick()
 if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
         Title = "eoHub",
-        Text = "成功運行，
-祝你早日被封",
+        Text = "成功運行，祝你早日被封",
         Duration = 1
     })
     lastNotificationTime = currentTime
