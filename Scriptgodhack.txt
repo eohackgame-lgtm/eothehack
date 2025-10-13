@@ -7142,7 +7142,7 @@ Tabs.Teleport:AddButton({
         end
     })
 Tabs.Visual:AddButton({
-    Title="Visual",
+    Title="修改器(假的)",
     Description="",
     Callback=function()
         local plr = game:GetService("Players").LocalPlayer
@@ -7187,7 +7187,7 @@ Tabs.Visual:AddButton({
     end
 })
 Tabs.Visual:AddInput("Input_Level", {
-    Title="Level",
+    Title="等級",
     Default="",
     Placeholder="Enter",
     Numeric=false, 
@@ -7197,7 +7197,7 @@ Tabs.Visual:AddInput("Input_Level", {
     end
 })
 Tabs.Visual:AddInput("Input_EXP", {
-    Title="Exp",
+    Title="經驗",
     Default="",
     Placeholder="Enter",
     Numeric=false, 
@@ -7207,7 +7207,7 @@ Tabs.Visual:AddInput("Input_EXP", {
     end
 })
 Tabs.Visual:AddInput("Input_Beli", {
-    Title="Money",
+    Title="錢",
     Default="",
     Placeholder="Enter",
     Numeric=false, 
@@ -8489,7 +8489,7 @@ Tabs.Shop:AddButton({
     end
 })
 Tabs.Shop:AddButton({
-    Title = "Race Draco",
+    Title = "龍族",
     Description = "Sea 3",
     Callback = function()
         local ThirdSea = 7449423635
@@ -9257,7 +9257,7 @@ spawn(function()
     end
 end)
 local ToggleCollectBone = Tabs.Sea:AddToggle("ToggleCollectBone", {
-    Title="Collect Bone", 
+    Title="撿化石", 
     Description="", 
     Default=false
 })
@@ -9276,7 +9276,7 @@ spawn(function()
     end
 end)
 local ToggleCollectEgg = Tabs.Sea:AddToggle("ToggleCollectEgg", {
-    Title = "Collect Egg",
+    Title = "撿龍蛋",
     Description = "",
     Default = false
 })
@@ -9341,7 +9341,8 @@ local currentTime = tick()
 if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
         Title = "eoHub",
-        Text = "Successfully",
+        Text = "成功運行，
+祝你早日被封",
         Duration = 1
     })
     lastNotificationTime = currentTime
