@@ -2736,7 +2736,7 @@ DropdownMastery:OnChanged(function(Value)
     TypeMastery = Value
 end)
 local ToggleMasteryFruit = Tabs.Main:AddToggle("ToggleMasteryFruit", {
-    Title = "Auto Fram Fruit",
+    Title = "自動刷果實",
     Description = "",
     Default = false
 })
@@ -4248,7 +4248,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 end)
 Tabs.Sea:AddButton({
-    Title="Buy Boat",
+    Title="買船",
     Description="",
     Callback=function()
         buyBoat(selectedBoat)
@@ -4751,7 +4751,7 @@ spawn(function()
     end)
     end)
 local Togglelockmoon = Tabs.Sea:AddToggle("Togglelockmoon", {
-    Title="Lock Moon + Use Race",
+    Title="看月亮+使用V3技能",
     Description="",
     Default=false
 })
@@ -6526,7 +6526,7 @@ spawn(function()
     end
 end)
 local ServerTime = Tabs.Status:AddParagraph({
-    Title="Servers Time",
+    Title="伺服器時間",
     Content=""
 })
 local function UpdateServerTime()
@@ -6542,7 +6542,7 @@ spawn(function()
     end
 end)
 local FrozenIsland = Tabs.Status:AddParagraph({
-    Title="Leviathan Island",
+    Title="利維坦島",
     Content=""
 })
 spawn(function()
@@ -6944,21 +6944,21 @@ spawn(function()
     end
 end)
 Tabs.Teleport:AddButton({
-    Title="Sea 1",
+    Title="1海",
     Description="",
     Callback=function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
     end
 })
 Tabs.Teleport:AddButton({
-    Title="Sea 2",
+    Title="2海",
     Description="",
     Callback=function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa")
     end
 })
 Tabs.Teleport:AddButton({
-    Title="Sea 3",
+    Title="3海",
     Description="",
     Callback=function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou")
@@ -7217,7 +7217,7 @@ Tabs.Visual:AddInput("Input_Beli", {
     end
 })
 Tabs.Visual:AddInput("Input_Fragments", {
-    Title="Point F",
+    Title="F幣",
     Default="",
     Placeholder="Enter",
     Numeric=false, 
@@ -9342,7 +9342,7 @@ if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
         Title = "eoHub",
         Text = "成功運行，祝你早日被封",
-        Duration = 1
+        Duration = 3
     })
     lastNotificationTime = currentTime
 end
