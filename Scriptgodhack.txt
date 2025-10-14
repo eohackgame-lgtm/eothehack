@@ -6826,7 +6826,7 @@ spawn(function()
 end)
 local Teleport = Tabs.Teleport:AddSection("World")
 local ToggleAutoSea2 = Tabs.Main1:AddToggle("ToggleAutoSea2", {
-    Title="Auto Sea 2",
+    Title="自動2海",
     Description="",
     Default=false
 })
@@ -6895,7 +6895,7 @@ spawn(function()
     end
 end)
 local ToggleAutoSea3 = Tabs.Main1:AddToggle("ToggleAutoSea3", {
-    Title="Auto Sea 3",
+    Title="自動3海",
     Description="",
     Default=false
 })
@@ -8711,15 +8711,15 @@ spawn(function()
 end)
 local Mastery = Tabs.Sea:AddSection("Leviathan")
 Tabs.Sea:AddButton({
-    Title="Buy Chip Leviathan",
-    Description="",
+    Title="購買利維坦情報",
+    Description="無冷卻",
     Callback=function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("InfoLeviathan", "2")
     end
 })
 local ToggleTPFrozenDimension = Tabs.Sea:AddToggle("ToggleTPFrozenDimension", {
-    Title="Teleport Leviathan Island", 
-    Description="", 
+    Title="傳送到冰凍維度（利維坦島/冰島）", 
+    Description="需要已被刷出來", 
     Default=false 
 })
 ToggleTPFrozenDimension:OnChanged(function(Value)
@@ -8742,7 +8742,7 @@ spawn(function()
 end)
 if Sea3 then
     local BribeLeviathan = Tabs.Sea:AddParagraph({
-        Title="Status Chip Leviathan",
+        Title="冷卻狀況",
         Content=""
     })
     spawn(function()
@@ -8762,7 +8762,7 @@ if Sea3 then
 end
 local Blaze = Tabs.Main1:AddSection("Draco")
 local ToggleBlazeEmber = Tabs.Sea:AddToggle("ToggleBlazeEmber", {
-    Title="Collect Blaze Ember", 
+    Title="自動撿火靈", 
     Description="", 
     Default=false
 })
@@ -9080,8 +9080,8 @@ spawn(function()
     end)
 end)
 local ToggleTPVolcano = Tabs.Sea:AddToggle("ToggleTPVolcano", { 
-    Title="Teleport Volcano Island", 
-    Description="", 
+    Title="傳送到火山島", 
+    Description="需要火山島已被刷出來", 
     Default=false 
 })
 ToggleTPVolcano:OnChanged(function(Value)
