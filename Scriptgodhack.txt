@@ -2736,7 +2736,7 @@ DropdownMastery:OnChanged(function(Value)
     TypeMastery = Value
 end)
 local ToggleMasteryFruit = Tabs.Main:AddToggle("ToggleMasteryFruit", {
-    Title = "自動刷果實",
+    Title = "自動刷果實熟練度",
     Description = "",
     Default = false
 })
@@ -2756,7 +2756,7 @@ local SliderHealt = Tabs.Main:AddSlider("SliderHealt", {
     Title = "Healt Mob",
     Description = "",
     Default = 25,
-    Min = 0,
+    Min = 1,
     Max = 100,
     Rounding = 1,
     Callback = function(Value)
@@ -3735,7 +3735,7 @@ spawn(function()
     end
 end)
     local ToggleSpawnCake = Tabs.Main:AddToggle("ToggleSpawnCake", {
-        Title="Spawner Cake Prince",
+        Title="召喚卡2",
         Description="", 
         Default=true })
     ToggleSpawnCake:OnChanged(function(Value)
@@ -4121,7 +4121,7 @@ createToggle("Auto Find Prehistoric", "AutoFindPrehistoric", islandsToDelete.Pre
 createToggle("Auto Find Mirage", "AutoFindMirage", islandsToDelete.Mirage, "MysticIsland", "Mystic Island")
 createToggle("Auto Find Leviathan", "AutoFindFrozen", islandsToDelete.Frozen, "FrozenDimension", "Leviathan Island")
 local AutoComeTikiToggle = Tabs.Sea:AddToggle("AutoComeTiki", {
-    Title="Auto Tiki Island",
+    Title="自動司法島",
     Description="",
     Default=false
 })
@@ -6790,7 +6790,7 @@ function InfAb()
         end
     end
 end
-local ToggleNoClip = Tabs.Player:AddToggle("ToggleNoClip", {Title = "No Clip",Description = "", Default = true })
+local ToggleNoClip = Tabs.Player:AddToggle("ToggleNoClip", {Title = "No Clip",Description = "", Default = false })
 ToggleNoClip:OnChanged(function(value)
     _G.LOf = value
 end)
@@ -9342,7 +9342,7 @@ if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
         Title = "eoHub",
         Text = "成功運行，祝你早日被封",
-        Duration = 3
+        Duration = 999
     })
     lastNotificationTime = currentTime
 end
