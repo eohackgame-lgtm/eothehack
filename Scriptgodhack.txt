@@ -9117,7 +9117,7 @@ ToggleDefendVolcano:OnChanged(function(Value)
     _G.AutoDefendVolcano = Value
 end)
 local ToggleMelee = Tabs.Sea:AddToggle("ToggleMelee", {
-    Title = "Use Melee", 
+    Title = "使用拳法", 
     Description = "", 
     Default = false
 })
@@ -9125,7 +9125,7 @@ ToggleMelee:OnChanged(function(Value)
     _G.UseMelee = Value
 end)
 local ToggleSword = Tabs.Sea:AddToggle("ToggleSword", {
-    Title = "Use Sword", 
+    Title = "使用劍", 
     Description = "", 
     Default = false
 })
@@ -9133,7 +9133,7 @@ ToggleSword:OnChanged(function(Value)
     _G.UseSword = Value
 end)
 local ToggleGun = Tabs.Sea:AddToggle("ToggleGun", {
-    Title = "Use Gun", 
+    Title = "使用槍", 
     Description = "", 
     Default = false
 })
