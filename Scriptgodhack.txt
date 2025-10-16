@@ -7035,7 +7035,7 @@ DropdownIsland:OnChanged(function(Value)
     _G.SelectIsland=Value
 end)
 Tabs.Teleport:AddButton({
-    Title="Teleport Island",
+    Title="傳送島嶼",
     Description="",
     Callback=function()
             if _G.SelectIsland=="WindMill" then
@@ -8942,7 +8942,7 @@ Tabs.Main1:AddButton({
     end
 })
 Tabs.Main1:AddButton({
-    Title="Craft Volcanic Magnet",
+    Title="製造火山磁鐵",
     Description="Need 15 Blaze Ember + 10 Iron",
     Callback=function()
         local args = {
@@ -8954,7 +8954,7 @@ Tabs.Main1:AddButton({
     end
 })
 Tabs.Main1:AddButton({
-    Title = "Craft Dino Hood",
+    Title = "製造龍帽,
     Description = "Need 25 Dinosaur Bones + 10 Mini Tusk",
     Callback = function()
         local args = {
@@ -8966,7 +8966,7 @@ Tabs.Main1:AddButton({
     end
 })
 Tabs.Main1:AddButton({
-    Title = "Craft T-Rex Skull",
+    Title = "製造化石冒",
     Description = "Need 8 Dinosaur Bones + 5 Dragon Scale",
     Callback = function()
         local args = {
@@ -9342,7 +9342,7 @@ if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
         Title = "eoHub",
         Text = "成功運行，祝你早日被封",
-        Duration = 999
+        Duration = 3600
     })
     lastNotificationTime = currentTime
 end
