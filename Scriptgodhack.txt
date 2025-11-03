@@ -1,307 +1,288 @@
--- 創建GUI
+-- 玩家移動速度增加系統
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- 創建主屏幕GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FastAttackGUI"
-ScreenGui.Parent = PlayerGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local SpeedGui = Instance.new("ScreenGui")
+SpeedGui.Name = "SpeedBoostGUI"
+SpeedGui.Parent = PlayerGui
+SpeedGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- 創建圖標按鈕
 local IconButton = Instance.new("ImageButton")
 IconButton.Name = "IconButton"
 IconButton.Size = UDim2.new(0, 60, 0, 60)
-IconButton.Position = UDim2.new(0, 20, 0.5, -30)
-IconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-IconButton.BackgroundTransparency = 0.5
+IconButton.Position = UDim2.new(0, 20, 0.7, -30)
+IconButton.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+IconButton.BackgroundTransparency = 0.3
 IconButton.Image = "rbxassetid://138136991120099"
 IconButton.ScaleType = Enum.ScaleType.Fit
-IconButton.Parent = ScreenGui
+IconButton.Parent = SpeedGui
 
--- 創建圓角效果
+-- 圓角效果
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0.2, 0)
 UICorner.Parent = IconButton
 
--- 創建面板
-local Panel = Instance.new("Frame")
-Panel.Name = "Panel"
-Panel.Size = UDim2.new(0, 300, 0, 200)
-Panel.Position = UDim2.new(0, 90, 0.5, -100)
-Panel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Panel.BackgroundTransparency = 0.2
-Panel.Visible = false
-Panel.Parent = ScreenGui
+-- 速度顯示文字
+local SpeedText = Instance.new("TextLabel")
+SpeedText.Name = "SpeedText"
+SpeedText.Size = UDim2.new(1, 0, 0, 20)
+SpeedText.Position = UDim2.new(0, 0, 1, 5)
+SpeedText.BackgroundTransparency = 1
+SpeedText.Text = "速度: 16"
+SpeedText.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedText.TextSize = 12
+SpeedText.Font = Enum.Font.GothamBold
+SpeedText.Parent = IconButton
+
+-- 創建控制面板
+local ControlPanel = Instance.new("Frame")
+ControlPanel.Name = "ControlPanel"
+ControlPanel.Size = UDim2.new(0, 250, 0, 180)
+ControlPanel.Position = UDim2.new(0, 90, 0.7, -90)
+ControlPanel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ControlPanel.BackgroundTransparency = 0.1
+ControlPanel.Visible = false
+ControlPanel.Parent = SpeedGui
 
 local PanelCorner = Instance.new("UICorner")
 PanelCorner.CornerRadius = UDim.new(0.05, 0)
-PanelCorner.Parent = Panel
+PanelCorner.Parent = ControlPanel
 
 -- 面板標題
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Title.BackgroundTransparency = 0.1
-Title.Text = "快速攻擊設置"
+Title.Text = "移動速度設置"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 18
+Title.TextSize = 16
 Title.Font = Enum.Font.GothamBold
-Title.Parent = Panel
+Title.Parent = ControlPanel
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0.05, 0.05)
 TitleCorner.Parent = Title
 
--- 開關容器
-local ToggleContainer = Instance.new("Frame")
-ToggleContainer.Name = "ToggleContainer"
-ToggleContainer.Size = UDim2.new(1, -40, 0, 50)
-ToggleContainer.Position = UDim2.new(0, 20, 0, 60)
-ToggleContainer.BackgroundTransparency = 1
-ToggleContainer.Parent = Panel
+-- 速度滑桿容器
+local SpeedSliderContainer = Instance.new("Frame")
+SpeedSliderContainer.Name = "SpeedSliderContainer"
+SpeedSliderContainer.Size = UDim2.new(1, -40, 0, 60)
+SpeedSliderContainer.Position = UDim2.new(0, 20, 0, 50)
+SpeedSliderContainer.BackgroundTransparency = 1
+SpeedSliderContainer.Parent = ControlPanel
 
--- 開關標籤
-local ToggleLabel = Instance.new("TextLabel")
-ToggleLabel.Name = "ToggleLabel"
-ToggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 0, 0, 0)
-ToggleLabel.BackgroundTransparency = 1
-ToggleLabel.Text = "超快攻擊"
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleLabel.TextSize = 16
-ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-ToggleLabel.Font = Enum.Font.Gotham
-ToggleLabel.Parent = ToggleContainer
+-- 速度標籤
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Name = "SpeedLabel"
+SpeedLabel.Size = UDim2.new(1, 0, 0, 25)
+SpeedLabel.Position = UDim2.new(0, 0, 0, 0)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Text = "移動速度: 16"
+SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedLabel.TextSize = 14
+SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+SpeedLabel.Font = Enum.Font.Gotham
+SpeedLabel.Parent = SpeedSliderContainer
 
--- 開關按鈕
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Size = UDim2.new(0, 50, 0, 30)
-ToggleButton.Position = UDim2.new(1, -50, 0.5, -15)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-ToggleButton.Text = ""
-ToggleButton.Parent = ToggleContainer
+-- 滑桿背景
+local SliderBackground = Instance.new("Frame")
+SliderBackground.Name = "SliderBackground"
+SliderBackground.Size = UDim2.new(1, 0, 0, 15)
+SliderBackground.Position = UDim2.new(0, 0, 0, 30)
+SliderBackground.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+SliderBackground.Parent = SpeedSliderContainer
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0.5, 0)
-ToggleCorner.Parent = ToggleButton
+local SliderBgCorner = Instance.new("UICorner")
+SliderBgCorner.CornerRadius = UDim.new(0.5, 0)
+SliderBgCorner.Parent = SliderBackground
 
--- 開關指示器
-local ToggleIndicator = Instance.new("Frame")
-ToggleIndicator.Name = "ToggleIndicator"
-ToggleIndicator.Size = UDim2.new(0, 20, 0, 20)
-ToggleIndicator.Position = UDim2.new(0, 5, 0.5, -10)
-ToggleIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleIndicator.Parent = ToggleButton
+-- 滑桿填充
+local SliderFill = Instance.new("Frame")
+SliderFill.Name = "SliderFill"
+SliderFill.Size = UDim2.new(0.2, 0, 1, 0) -- 初始20%
+SliderFill.Position = UDim2.new(0, 0, 0, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+SliderFill.Parent = SliderBackground
 
-local IndicatorCorner = Instance.new("UICorner")
-IndicatorCorner.CornerRadius = UDim.new(0.5, 0)
-IndicatorCorner.Parent = ToggleIndicator
+local SliderFillCorner = Instance.new("UICorner")
+SliderFillCorner.CornerRadius = UDim.new(0.5, 0)
+SliderFillCorner.Parent = SliderFill
 
--- 範圍顯示
-local RangeLabel = Instance.new("TextLabel")
-RangeLabel.Name = "RangeLabel"
-RangeLabel.Size = UDim2.new(1, -40, 0, 30)
-RangeLabel.Position = UDim2.new(0, 20, 0, 120)
-RangeLabel.BackgroundTransparency = 1
-RangeLabel.Text = "攻擊範圍: 150"
-RangeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-RangeLabel.TextSize = 14
-RangeLabel.Font = Enum.Font.Gotham
-RangeLabel.Parent = Panel
+-- 滑桿按鈕
+local SliderButton = Instance.new("TextButton")
+SliderButton.Name = "SliderButton"
+SliderButton.Size = UDim2.new(0, 20, 0, 20)
+SliderButton.Position = UDim2.new(0.2, -10, 0.5, -10) -- 對應初始20%
+SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SliderButton.Text = ""
+SliderButton.ZIndex = 2
+SliderButton.Parent = SliderBackground
+
+local SliderBtnCorner = Instance.new("UICorner")
+SliderBtnCorner.CornerRadius = UDim.new(0.5, 0)
+SliderBtnCorner.Parent = SliderButton
+
+-- 速度範圍標示
+local SpeedRangeLabel = Instance.new("TextLabel")
+SpeedRangeLabel.Name = "SpeedRangeLabel"
+SpeedRangeLabel.Size = UDim2.new(1, 0, 0, 20)
+SpeedRangeLabel.Position = UDim2.new(0, 0, 1, -25)
+SpeedRangeLabel.BackgroundTransparency = 1
+SpeedRangeLabel.Text = "16 - 100"
+SpeedRangeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedRangeLabel.TextSize = 12
+SpeedRangeLabel.Font = Enum.Font.Gotham
+SpeedRangeLabel.Parent = SpeedSliderContainer
 
 -- 狀態顯示
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Name = "StatusLabel"
-StatusLabel.Size = UDim2.new(1, -40, 0, 30)
-StatusLabel.Position = UDim2.new(0, 20, 0, 150)
+StatusLabel.Size = UDim2.new(1, -40, 0, 25)
+StatusLabel.Position = UDim2.new(0, 20, 0, 130)
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Text = "狀態: 關閉"
-StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+StatusLabel.Text = "狀態: 正常速度"
+StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
 StatusLabel.TextSize = 14
 StatusLabel.Font = Enum.Font.Gotham
-StatusLabel.Parent = Panel
+StatusLabel.Parent = ControlPanel
 
--- 開關狀態變量
-local FastAttackEnabled = false
-local FastAttackConnection = nil
+-- 變量
+local CurrentSpeed = 16
+local TargetSpeed = 16
+local IsDragging = false
+local SpeedConnection = nil
 
--- 切換開關函數
-local function ToggleFastAttack()
-    FastAttackEnabled = not FastAttackEnabled
+-- 計算速度值 (16-100)
+local function CalculateSpeed(percentage)
+    return math.floor(16 + (percentage * 84)) -- 16 + (0-1 * 84) = 16-100
+end
+
+-- 更新速度顯示
+local function UpdateSpeedDisplay(speed)
+    SpeedLabel.Text = "移動速度: " .. speed
+    SpeedText.Text = "速度: " .. speed
+    StatusLabel.Text = "狀態: " .. (speed > 16 and "加速中 (" .. speed .. ")" or "正常速度")
     
-    if FastAttackEnabled then
-        -- 開啟狀態
-        TweenService:Create(ToggleIndicator, TweenInfo.new(0.2), {
-            Position = UDim2.new(1, -25, 0.5, -10),
-            BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        }):Play()
-        TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-        }):Play()
-        StatusLabel.Text = "狀態: 開啟"
-        StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-        
-        -- 啟動快速攻擊
-        StartFastAttack()
+    if speed > 16 then
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
     else
-        -- 關閉狀態
-        TweenService:Create(ToggleIndicator, TweenInfo.new(0.2), {
-            Position = UDim2.new(0, 5, 0.5, -10),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        }):Play()
-        TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        }):Play()
-        StatusLabel.Text = "狀態: 關閉"
-        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-        
-        -- 停止快速攻擊
-        if FastAttackConnection then
-            FastAttackConnection:Disconnect()
-            FastAttackConnection = nil
+        StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    end
+end
+
+-- 應用速度到角色
+local function ApplySpeedToCharacter(speed)
+    if Player.Character then
+        local Humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then
+            pcall(function()
+                Humanoid.WalkSpeed = speed
+            end)
         end
     end
 end
 
--- 點擊開關按鈕
-ToggleButton.MouseButton1Click:Connect(ToggleFastAttack)
+-- 設置速度
+local function SetSpeed(speed)
+    TargetSpeed = math.clamp(speed, 16, 100)
+    CurrentSpeed = TargetSpeed
+    
+    -- 更新滑桿視覺
+    local percentage = (TargetSpeed - 16) / 84
+    SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
+    SliderButton.Position = UDim2.new(percentage, -10, 0.5, -10)
+    
+    UpdateSpeedDisplay(TargetSpeed)
+    ApplySpeedToCharacter(TargetSpeed)
+end
 
--- 圖標點擊切換面板顯示
+-- 滑鼠點擊滑桿
+SliderButton.MouseButton1Down:Connect(function()
+    IsDragging = true
+end)
+
+-- 滑鼠釋放
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        IsDragging = false
+    end
+end)
+
+-- 滑鼠移動時更新滑桿
+UserInputService.InputChanged:Connect(function(input)
+    if IsDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = input.Position
+        local sliderAbsolutePos = SliderBackground.AbsolutePosition
+        local sliderAbsoluteSize = SliderBackground.AbsoluteSize
+        
+        -- 計算滑桿位置
+        local relativeX = (mousePos.X - sliderAbsolutePos.X) / sliderAbsoluteSize.X
+        relativeX = math.clamp(relativeX, 0, 1)
+        
+        -- 更新滑桿視覺
+        SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+        SliderButton.Position = UDim2.new(relativeX, -10, 0.5, -10)
+        
+        -- 計算並設置速度
+        local newSpeed = CalculateSpeed(relativeX)
+        SetSpeed(newSpeed)
+    end
+end)
+
+-- 點擊滑桿背景直接設置位置
+SliderBackground.MouseButton1Down:Connect(function(x, y)
+    local sliderAbsolutePos = SliderBackground.AbsolutePosition
+    local sliderAbsoluteSize = SliderBackground.AbsoluteSize
+    
+    local relativeX = (x - sliderAbsolutePos.X) / sliderAbsoluteSize.X
+    relativeX = math.clamp(relativeX, 0, 1)
+    
+    -- 更新滑桿視覺
+    SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+    SliderButton.Position = UDim2.new(relativeX, -10, 0.5, -10)
+    
+    -- 計算並設置速度
+    local newSpeed = CalculateSpeed(relativeX)
+    SetSpeed(newSpeed)
+end)
+
+-- 圖標點擊顯示/隱藏面板
 IconButton.MouseButton1Click:Connect(function()
-    Panel.Visible = not Panel.Visible
+    ControlPanel.Visible = not ControlPanel.Visible
 end)
 
--- 快速攻擊系統
-local function StartFastAttack()
-    if FastAttackConnection then
-        FastAttackConnection:Disconnect()
-        FastAttackConnection = nil
-    end
-    
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    
-    -- 安全獲取子對象函數
-    local function SafeWaitForChild(parent, childName)
-        local success, result = pcall(function()
-            return parent:WaitForChild(childName)
-        end)
-        return success and result or nil
-    end
-    
-    -- 基於你原來的腳本修復快速攻擊系統
-    FastAttackConnection = RunService.Heartbeat:Connect(function()
-        if not FastAttackEnabled or not Player.Character then 
-            return 
-        end
-        
-        -- 檢查角色是否存活
-        local function IsAlive(character)
-            return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
-        end
-        
-        if not IsAlive(Player.Character) then return end
-        
-        local AttackRange = 150 -- 攻擊範圍
-        
-        -- 獲取敵人
-        local Enemies = workspace:FindFirstChild("Enemies")
-        local Characters = workspace:FindFirstChild("Characters")
-        
-        if not Enemies then return end
-        
-        local OthersEnemies = {}
-        local NearestHead = nil
-        local NearestDistance = AttackRange
-        
-        -- 在敵人中尋找目標
-        for _, Enemy in pairs(Enemies:GetChildren()) do
-            if IsAlive(Enemy) then
-                local Head = Enemy:FindFirstChild("Head")
-                if Head then
-                    local Distance = (Player.Character:GetPivot().Position - Head.Position).Magnitude
-                    if Distance < NearestDistance then
-                        table.insert(OthersEnemies, {Enemy, Head})
-                        NearestHead = Head
-                        NearestDistance = Distance
-                    end
-                end
-            end
-        end
-        
-        -- 在玩家角色中尋找目標（PvP）
-        if Characters then
-            for _, Character in pairs(Characters:GetChildren()) do
-                if Character ~= Player.Character and IsAlive(Character) then
-                    local Head = Character:FindFirstChild("Head")
-                    if Head then
-                        local Distance = (Player.Character:GetPivot().Position - Head.Position).Magnitude
-                        if Distance < NearestDistance then
-                            table.insert(OthersEnemies, {Character, Head})
-                            NearestHead = Head
-                            NearestDistance = Distance
-                        end
-                    end
-                end
-            end
-        end
-        
-        -- 如果找到目標且裝備了武器，則攻擊
-        if #OthersEnemies > 0 and NearestHead then
-            local EquippedTool = Player.Character:FindFirstChildOfClass("Tool")
-            if EquippedTool then
-                -- 使用原腳本的遠程事件調用方式
-                local Remotes = SafeWaitForChild(ReplicatedStorage, "Remotes")
-                if Remotes then
-                    local CommF = SafeWaitForChild(Remotes, "CommF_")
-                    if CommF then
-                        -- 發起攻擊
-                        pcall(function()
-                            -- 嘗試多種可能的攻擊方式
-                            CommF:InvokeServer("Attack", NearestHead.Parent.Name)
-                            CommF:InvokeServer("Click")
-                        end)
-                    end
-                    
-                    -- 嘗試使用Modules中的Net
-                    local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
-                    if Modules then
-                        local Net = SafeWaitForChild(Modules, "Net")
-                        if Net then
-                            local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
-                            local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
-                            
-                            if RegisterAttack and RegisterHit then
-                                pcall(function()
-                                    RegisterAttack:FireServer(0) -- 無延遲
-                                    RegisterHit:FireServer(NearestHead, OthersEnemies)
-                                end)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end)
+-- 自動應用速度到新角色
+Player.CharacterAdded:Connect(function(character)
+    wait(1) -- 等待角色完全加載
+    ApplySpeedToCharacter(CurrentSpeed)
+end)
+
+-- 持續檢查並應用速度（防止遊戲重置）
+if SpeedConnection then
+    SpeedConnection:Disconnect()
 end
 
--- 初始通知
-task.spawn(function()
-    wait(2)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "快速攻擊系統",
-        Text = "GUI加載完成！點擊圖標打開設置",
-        Duration = 5
-    })
+SpeedConnection = RunService.Heartbeat:Connect(function()
+    if Player.Character then
+        local Humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid and Humanoid.WalkSpeed ~= CurrentSpeed then
+            pcall(function()
+                Humanoid.WalkSpeed = CurrentSpeed
+            end)
+        end
+    end
 end)
 
--- 添加拖拽功能
+-- 添加面板拖拽功能
 local dragging
 local dragInput
 local dragStart
@@ -309,14 +290,14 @@ local startPos
 
 local function update(input)
     local delta = input.Position - dragStart
-    Panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    ControlPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
-Panel.InputBegan:Connect(function(input)
+ControlPanel.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = Panel.Position
+        startPos = ControlPanel.Position
         
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
@@ -326,7 +307,7 @@ Panel.InputBegan:Connect(function(input)
     end
 end)
 
-Panel.InputChanged:Connect(function(input)
+ControlPanel.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
@@ -337,6 +318,19 @@ UserInputService.InputChanged:Connect(function(input)
         update(input)
     end
 end)
+
+-- 初始通知
+task.spawn(function()
+    wait(2)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "移動速度控制器",
+        Text = "加載完成！點擊圖標調整速度",
+        Duration = 5
+    })
+end)
+
+-- 初始化速度
+SetSpeed(16)
 local lastNotificationTime = 0
 local notificationCooldown = 10
 local currentTime = tick()
