@@ -1,7 +1,7 @@
 -- 創建GUI
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
@@ -124,12 +124,13 @@ StatusLabel.Position = UDim2.new(0, 20, 0, 150)
 StatusLabel.BackgroundTransparency = 1
 StatusLabel.Text = "狀態: 關閉"
 StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-RangeLabel.TextSize = 14
+StatusLabel.TextSize = 14
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.Parent = Panel
 
 -- 開關狀態變量
 local FastAttackEnabled = false
+local FastAttackConnection = nil
 
 -- 切換開關函數
 local function ToggleFastAttack()
@@ -164,6 +165,7 @@ local function ToggleFastAttack()
         -- 停止快速攻擊
         if FastAttackConnection then
             FastAttackConnection:Disconnect()
+            FastAttackConnection = nil
         end
     end
 end
@@ -177,17 +179,13 @@ IconButton.MouseButton1Click:Connect(function()
 end)
 
 -- 快速攻擊系統
-local FastAttackConnection = nil
-
 local function StartFastAttack()
     if FastAttackConnection then
         FastAttackConnection:Disconnect()
+        FastAttackConnection = nil
     end
     
-    local RunService = game:GetService("RunService")
-    local Players = game:GetService("Players")
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Player = Players.LocalPlayer
     
     -- 安全獲取子對象函數
     local function SafeWaitForChild(parent, childName)
@@ -197,30 +195,18 @@ local function StartFastAttack()
         return success and result or nil
     end
     
-    -- 獲取必要的遠程事件
-    local Remotes = SafeWaitForChild(ReplicatedStorage, "Remotes")
-    if not Remotes then return end
-    
-    local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
-    local Net = SafeWaitForChild(Modules, "Net")
-    
-    local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
-    local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
-    
-    if not RegisterAttack or not RegisterHit then
-        StatusLabel.Text = "狀態: 錯誤 - 找不到遠程事件"
-        StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-        return
-    end
-    
-    -- 檢查角色是否存活
-    local function IsAlive(character)
-        return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
-    end
-    
-    -- 快速攻擊邏輯
+    -- 基於你原來的腳本修復快速攻擊系統
     FastAttackConnection = RunService.Heartbeat:Connect(function()
-        if not FastAttackEnabled or not Player.Character then return end
+        if not FastAttackEnabled or not Player.Character then 
+            return 
+        end
+        
+        -- 檢查角色是否存活
+        local function IsAlive(character)
+            return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
+        end
+        
+        if not IsAlive(Player.Character) then return end
         
         local AttackRange = 150 -- 攻擊範圍
         
@@ -230,26 +216,26 @@ local function StartFastAttack()
         
         if not Enemies then return end
         
-        local NearestEnemy = nil
-        local NearestDistance = AttackRange
+        local OthersEnemies = {}
         local NearestHead = nil
+        local NearestDistance = AttackRange
         
-        -- 在敵人中尋找最近的目標
+        -- 在敵人中尋找目標
         for _, Enemy in pairs(Enemies:GetChildren()) do
             if IsAlive(Enemy) then
                 local Head = Enemy:FindFirstChild("Head")
                 if Head then
                     local Distance = (Player.Character:GetPivot().Position - Head.Position).Magnitude
                     if Distance < NearestDistance then
-                        NearestEnemy = Enemy
-                        NearestDistance = Distance
+                        table.insert(OthersEnemies, {Enemy, Head})
                         NearestHead = Head
+                        NearestDistance = Distance
                     end
                 end
             end
         end
         
-        -- 在玩家角色中尋找最近的目標（PvP）
+        -- 在玩家角色中尋找目標（PvP）
         if Characters then
             for _, Character in pairs(Characters:GetChildren()) do
                 if Character ~= Player.Character and IsAlive(Character) then
@@ -257,24 +243,49 @@ local function StartFastAttack()
                     if Head then
                         local Distance = (Player.Character:GetPivot().Position - Head.Position).Magnitude
                         if Distance < NearestDistance then
-                            NearestEnemy = Character
-                            NearestDistance = Distance
+                            table.insert(OthersEnemies, {Character, Head})
                             NearestHead = Head
+                            NearestDistance = Distance
                         end
                     end
                 end
             end
         end
         
-        -- 如果找到目標且裝備了近戰武器，則攻擊
-        if NearestEnemy and NearestHead then
+        -- 如果找到目標且裝備了武器，則攻擊
+        if #OthersEnemies > 0 and NearestHead then
             local EquippedTool = Player.Character:FindFirstChildOfClass("Tool")
-            if EquippedTool and EquippedTool:FindFirstChild("ToolTip") and EquippedTool.ToolTip.Value ~= "Gun" then
-                -- 發起攻擊
-                pcall(function()
-                    RegisterAttack:FireServer(0) -- 無延遲
-                    RegisterHit:FireServer(NearestHead, {NearestEnemy})
-                end)
+            if EquippedTool then
+                -- 使用原腳本的遠程事件調用方式
+                local Remotes = SafeWaitForChild(ReplicatedStorage, "Remotes")
+                if Remotes then
+                    local CommF = SafeWaitForChild(Remotes, "CommF_")
+                    if CommF then
+                        -- 發起攻擊
+                        pcall(function()
+                            -- 嘗試多種可能的攻擊方式
+                            CommF:InvokeServer("Attack", NearestHead.Parent.Name)
+                            CommF:InvokeServer("Click")
+                        end)
+                    end
+                    
+                    -- 嘗試使用Modules中的Net
+                    local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
+                    if Modules then
+                        local Net = SafeWaitForChild(Modules, "Net")
+                        if Net then
+                            local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
+                            local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
+                            
+                            if RegisterAttack and RegisterHit then
+                                pcall(function()
+                                    RegisterAttack:FireServer(0) -- 無延遲
+                                    RegisterHit:FireServer(NearestHead, OthersEnemies)
+                                end)
+                            end
+                        end
+                    end
+                end
             end
         end
     end)
@@ -288,6 +299,43 @@ task.spawn(function()
         Text = "GUI加載完成！點擊圖標打開設置",
         Duration = 5
     })
+end)
+
+-- 添加拖拽功能
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    Panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+Panel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = Panel.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Panel.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
 end)
 local lastNotificationTime = 0
 local notificationCooldown = 10
