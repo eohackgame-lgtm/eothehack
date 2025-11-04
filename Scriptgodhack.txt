@@ -1,3 +1,10 @@
+-- 頂部通知
+game.StarterGui:SetCore("SendNotification", {
+    Title = "eoHub",
+    Text = "成功運行，祝你早日被封",
+    Duration = 999
+})
+
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -41,16 +48,4 @@ PanelCorner.Parent = Panel
 -- 圖標點擊事件
 IconButton.MouseButton1Click:Connect(function()
     Panel.Visible = not Panel.Visible
-    
-    -- 顯示通知
-    local lastNotificationTime = 0
-local notificationCooldown = 10
-local currentTime = tick()
-if currentTime - lastNotificationTime >= notificationCooldown then
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "eoHub",
-        Text = "成功運行，祝你早日被封",
-        Duration = 999
-    })
-    lastNotificationTime = currentTime
-end
+end)
