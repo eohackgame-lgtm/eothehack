@@ -46,7 +46,7 @@ PanelCorner.CornerRadius = UDim.new(0.05, 0)
 PanelCorner.Parent = Panel
 
 -- 添加传送按钮
-local teleportButton = Instance.new("移動來離開戰鬥")
+local teleportButton = Instance.new("TextButton")
 teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
 teleportButton.Position = UDim2.new(0, 20, 0, 20)
@@ -56,7 +56,7 @@ teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.Parent = Panel
 
 -- 添加停止按钮
-local stopButton = Instance.new("停止")
+local stopButton = Instance.new("TextButton")
 stopButton.Name = "StopButton"
 stopButton.Size = UDim2.new(0, 150, 0, 40)
 stopButton.Position = UDim2.new(0, 20, 0, 70)
