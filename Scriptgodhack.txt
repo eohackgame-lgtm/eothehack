@@ -45,6 +45,78 @@ local PanelCorner = Instance.new("UICorner")
 PanelCorner.CornerRadius = UDim.new(0.05, 0)
 PanelCorner.Parent = Panel
 
+-- 添加传送按钮
+local teleportButton = Instance.new("移動來離開戰鬥")
+teleportButton.Name = "TeleportButton"
+teleportButton.Size = UDim2.new(0, 150, 0, 40)
+teleportButton.Position = UDim2.new(0, 20, 0, 20)
+teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+teleportButton.Text = "传送到 (0,9999,0)"
+teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.Parent = Panel
+
+-- 添加停止按钮
+local stopButton = Instance.new("停止")
+stopButton.Name = "StopButton"
+stopButton.Size = UDim2.new(0, 150, 0, 40)
+stopButton.Position = UDim2.new(0, 20, 0, 70)
+stopButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+stopButton.Text = "停止传送"
+stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopButton.Parent = Panel
+
+-- 控制变量
+local isTeleporting = false
+local teleportConnection = nil
+
+-- 传送功能
+teleportButton.MouseButton1Click:Connect(function()
+    if not Player.Character then return end
+    
+    local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+    
+    isTeleporting = true
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "传送中",
+        Text = "正在传送到 (0,9999,0)...",
+        Duration = 3
+    })
+    
+    -- 执行传送
+    humanoidRootPart.CFrame = CFrame.new(0, 9999, 0)
+    
+    -- 可选：持续传送（防止掉下来）
+    teleportConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if not isTeleporting or not Player.Character then
+            teleportConnection:Disconnect()
+            return
+        end
+        
+        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CFrame = CFrame.new(0, 9999, 0)
+        end
+    end)
+end)
+
+-- 停止功能
+stopButton.MouseButton1Click:Connect(function()
+    isTeleporting = false
+    
+    if teleportConnection then
+        teleportConnection:Disconnect()
+        teleportConnection = nil
+    end
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "已停止",
+        Text = "传送已停止",
+        Duration = 3
+    })
+end)
+
 -- 圖標點擊事件（只顯示面板，不發送通知）
 IconButton.MouseButton1Click:Connect(function()
     Panel.Visible = not Panel.Visible
