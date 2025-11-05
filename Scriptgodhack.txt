@@ -51,7 +51,7 @@ teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
 teleportButton.Position = UDim2.new(0, 20, 0, 20)
 teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-teleportButton.Text = "传送到 (0,9999,0)"
+teleportButton.Text = "传送到 (9999,0,9999)"
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.Parent = Panel
 
@@ -80,7 +80,7 @@ teleportButton.MouseButton1Click:Connect(function()
     
     game.StarterGui:SetCore("SendNotification", {
         Title = "传送中",
-        Text = "正在传送到 (0,9999,0)...",
+        Text = "正在传送...",
         Duration = 3
     })
     
