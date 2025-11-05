@@ -1,13 +1,13 @@
--- 頂部通知
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- 顯示通知（加載時自動顯示）
 game.StarterGui:SetCore("SendNotification", {
     Title = "eoHub",
     Text = "成功運行，祝你早日被封",
     Duration = 999
 })
-
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- 創建主屏幕GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -45,7 +45,7 @@ local PanelCorner = Instance.new("UICorner")
 PanelCorner.CornerRadius = UDim.new(0.05, 0)
 PanelCorner.Parent = Panel
 
--- 圖標點擊事件
+-- 圖標點擊事件（只顯示面板，不發送通知）
 IconButton.MouseButton1Click:Connect(function()
     Panel.Visible = not Panel.Visible
 end)
