@@ -85,7 +85,7 @@ teleportButton.MouseButton1Click:Connect(function()
     })
     
     -- 执行传送
-    humanoidRootPart.CFrame = CFrame.new(0, 9999, 0)
+    humanoidRootPart.CFrame = CFrame.new(9999, 0, 9999)
     
     -- 可选：持续传送（防止掉下来）
     teleportConnection = game:GetService("RunService").Heartbeat:Connect(function()
@@ -96,7 +96,7 @@ teleportButton.MouseButton1Click:Connect(function()
         
         local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
-            hrp.CFrame = CFrame.new(0, 9999, 0)
+            hrp.CFrame = CFrame.new(9999, 0, 9999)
         end
     end)
 end)
