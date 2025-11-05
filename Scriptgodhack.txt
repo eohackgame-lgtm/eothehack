@@ -36,7 +36,7 @@ local Panel = Instance.new("Frame")
 Panel.Name = "Panel"
 Panel.Size = UDim2.new(0, 300, 0, 200)
 Panel.Position = UDim2.new(0, 90, 0, 20)
-Panel.BackgroundColor3 = Color3.fromRGB(local randomNumber = math.random(0, 255), local randomNumber = math.random(0, 255), local randomNumber = math.random(0, 255))
+Panel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Panel.BackgroundTransparency = 0.1
 Panel.Visible = false
 Panel.Parent = ScreenGui
