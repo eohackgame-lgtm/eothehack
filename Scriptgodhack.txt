@@ -51,7 +51,7 @@ teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
 teleportButton.Position = UDim2.new(0, 20, 0, 20)
 teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-teleportButton.Text = "沿Z軸移動 (速度300)"
+teleportButton.Text = "沿X軸移動 (速度300)"
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.TextScaled = true
 teleportButton.Parent = Panel
@@ -79,7 +79,6 @@ stopCorner.Parent = stopButton
 -- 控制变量
 local isMoving = false
 local moveConnection = nil
-local moveDirection = 1 -- 移動方向 (1 = 正向, -1 = 反向)
 
 -- 移動功能
 teleportButton.MouseButton1Click:Connect(function()
@@ -92,13 +91,12 @@ teleportButton.MouseButton1Click:Connect(function()
     
     game.StarterGui:SetCore("SendNotification", {
         Title = "移動中",
-        Text = "正在沿Z軸移動，速度300...",
+        Text = "正在沿X軸移動，速度300...",
         Duration = 3
     })
     
-    -- 獲取當前位置，保持X不變，高度設為200
+    -- 獲取當前位置，保持Z不變，高度設為200
     local currentPos = humanoidRootPart.Position
-    local startZ = currentPos.Z
     
     -- 執行初始位置設定 (高度200)
     humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z)
@@ -113,11 +111,11 @@ teleportButton.MouseButton1Click:Connect(function()
         local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
             local currentPos = hrp.Position
-            -- 計算新的Z位置，速度為300每秒
-            local newZ = currentPos.Z + (300 * deltaTime * moveDirection)
+            -- 計算新的X位置，速度為300每秒
+            local newX = currentPos.X + (300 * deltaTime)
             
-            -- 設置新位置 (保持X不變，高度200，Z軸移動)
-            hrp.CFrame = CFrame.new(currentPos.X, 200, newZ)
+            -- 設置新位置 (保持Z不變，高度200，X軸移動)
+            hrp.CFrame = CFrame.new(newX, 200, currentPos.Z)
         end
     end)
 end)
