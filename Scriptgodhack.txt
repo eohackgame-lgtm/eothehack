@@ -45,17 +45,18 @@ local PanelCorner = Instance.new("UICorner")
 PanelCorner.CornerRadius = UDim.new(0.05, 0)
 PanelCorner.Parent = Panel
 
--- 添加移動按鈕
+-- 添加传送按钮
 local teleportButton = Instance.new("TextButton")
 teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
 teleportButton.Position = UDim2.new(0, 20, 0, 20)
 teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-teleportButton.Text = "移動"
+teleportButton.Text = "沿Z軸移動 (速度300)"
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.TextScaled = true
 teleportButton.Parent = Panel
 
--- 添加停止按鈕
+-- 添加停止按钮
 local stopButton = Instance.new("TextButton")
 stopButton.Name = "StopButton"
 stopButton.Size = UDim2.new(0, 150, 0, 40)
@@ -63,37 +64,47 @@ stopButton.Position = UDim2.new(0, 20, 0, 70)
 stopButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
 stopButton.Text = "停止移動"
 stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopButton.TextScaled = true
 stopButton.Parent = Panel
+
+-- 为按钮添加圆角
+local teleportCorner = Instance.new("UICorner")
+teleportCorner.CornerRadius = UDim.new(0, 8)
+teleportCorner.Parent = teleportButton
+
+local stopCorner = Instance.new("UICorner")
+stopCorner.CornerRadius = UDim.new(0, 8)
+stopCorner.Parent = stopButton
 
 -- 控制变量
 local isMoving = false
 local moveConnection = nil
-local moveSpeed = 50 -- 移動速度
+local moveDirection = 1 -- 移動方向 (1 = 正向, -1 = 反向)
 
--- 移動功能 - 先將Y座標設為80，再持續向前移動
+-- 移動功能
 teleportButton.MouseButton1Click:Connect(function()
     if not Player.Character then return end
     
     local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
     if not humanoidRootPart then return end
     
-    -- 先將Y座標設為80
-    humanoidRootPart.CFrame = CFrame.new(
-        humanoidRootPart.Position.X,
-        80,
-        humanoidRootPart.Position.Z
-    )
-    
     isMoving = true
     
     game.StarterGui:SetCore("SendNotification", {
         Title = "移動中",
-        Text = "高度已調整為80，正在持續移動...",
+        Text = "正在沿Z軸移動，速度300...",
         Duration = 3
     })
     
+    -- 獲取當前位置，保持X不變，高度設為200
+    local currentPos = humanoidRootPart.Position
+    local startZ = currentPos.Z
+    
+    -- 執行初始位置設定 (高度200)
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z)
+    
     -- 持續移動
-    moveConnection = game:GetService("RunService").Heartbeat:Connect(function()
+    moveConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
         if not isMoving or not Player.Character then
             moveConnection:Disconnect()
             return
@@ -101,8 +112,12 @@ teleportButton.MouseButton1Click:Connect(function()
         
         local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
-            -- 持續向X軸正方向移動
-            hrp.Velocity = Vector3.new(moveSpeed, 0, 0)
+            local currentPos = hrp.Position
+            -- 計算新的Z位置，速度為300每秒
+            local newZ = currentPos.Z + (300 * deltaTime * moveDirection)
+            
+            -- 設置新位置 (保持X不變，高度200，Z軸移動)
+            hrp.CFrame = CFrame.new(currentPos.X, 200, newZ)
         end
     end)
 end)
@@ -114,14 +129,6 @@ stopButton.MouseButton1Click:Connect(function()
     if moveConnection then
         moveConnection:Disconnect()
         moveConnection = nil
-    end
-    
-    -- 停止角色移動
-    if Player.Character then
-        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.Velocity = Vector3.new(0, 0, 0)
-        end
     end
     
     game.StarterGui:SetCore("SendNotification", {
