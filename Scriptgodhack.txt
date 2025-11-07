@@ -99,7 +99,7 @@ teleportButton.MouseButton1Click:Connect(function()
     local currentPos = humanoidRootPart.Position
     
     -- 執行初始位置設定 (高度200)
-    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z)
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 250, currentPos.Z)
     
     -- 持續移動
     moveConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
