@@ -102,8 +102,8 @@ teleportButton.MouseButton1Click:Connect(function()
     -- 向左旋轉90度（使船頭朝向移動方向的右側）
     local rotatedCFrame = currentCFrame * CFrame.Angles(0, math.rad(90), 0)
     
-    -- 執行初始位置設定 (高度300，並旋轉90度)
-    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 300, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+    -- 執行初始位置設定 (高度220，並旋轉90度)
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 220, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
     
     -- 持續移動
     moveConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
@@ -118,8 +118,8 @@ teleportButton.MouseButton1Click:Connect(function()
             -- 計算新的X位置，速度為300每秒，向負方向移動
             local newX = currentPos.X - (300 * deltaTime)
             
-            -- 設置新位置 (保持Z不變，高度300，X軸負方向移動，保持旋轉)
-            hrp.CFrame = CFrame.new(newX, 300, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+            -- 設置新位置 (保持Z不變，高度220，X軸負方向移動，保持旋轉)
+            hrp.CFrame = CFrame.new(newX, 220, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
         end
     end)
 end)
