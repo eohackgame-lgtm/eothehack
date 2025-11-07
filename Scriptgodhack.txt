@@ -45,6 +45,26 @@ local PanelCorner = Instance.new("UICorner")
 PanelCorner.CornerRadius = UDim.new(0.05, 0)
 PanelCorner.Parent = Panel
 
+-- 添加移動按鈕
+local teleportButton = Instance.new("TextButton")
+teleportButton.Name = "TeleportButton"
+teleportButton.Size = UDim2.new(0, 150, 0, 40)
+teleportButton.Position = UDim2.new(0, 20, 0, 20)
+teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+teleportButton.Text = "移動"
+teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.Parent = Panel
+
+-- 添加停止按鈕
+local stopButton = Instance.new("TextButton")
+stopButton.Name = "StopButton"
+stopButton.Size = UDim2.new(0, 150, 0, 40)
+stopButton.Position = UDim2.new(0, 20, 0, 70)
+stopButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+stopButton.Text = "停止移動"
+stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopButton.Parent = Panel
+
 -- 控制变量
 local isMoving = false
 local moveConnection = nil
