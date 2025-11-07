@@ -34,7 +34,7 @@ UICorner.Parent = IconButton
 -- 創建空白面板
 local Panel = Instance.new("Frame")
 Panel.Name = "Panel"
-Panel.Size = UDim2.new(0, 300, 0, 250) -- 增加高度以容納進度條
+Panel.Size = UDim2.new(0, 300, 0, 200)
 Panel.Position = UDim2.new(0, 90, 0, 20)
 Panel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Panel.BackgroundTransparency = 0.1
@@ -76,133 +76,9 @@ local stopCorner = Instance.new("UICorner")
 stopCorner.CornerRadius = UDim.new(0, 8)
 stopCorner.Parent = stopButton
 
--- 添加高度調整標籤
-local heightLabel = Instance.new("TextLabel")
-heightLabel.Name = "HeightLabel"
-heightLabel.Size = UDim2.new(0, 150, 0, 20)
-heightLabel.Position = UDim2.new(0, 20, 0, 120)
-heightLabel.BackgroundTransparency = 1
-heightLabel.Text = "高度: 200"
-heightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-heightLabel.TextScaled = true
-heightLabel.Parent = Panel
-
--- 添加高度調整進度條背景
-local heightSliderBackground = Instance.new("Frame")
-heightSliderBackground.Name = "HeightSliderBackground"
-heightSliderBackground.Size = UDim2.new(0, 150, 0, 10)
-heightSliderBackground.Position = UDim2.new(0, 20, 0, 145)
-heightSliderBackground.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-heightSliderBackground.Parent = Panel
-
-local heightSliderBackgroundCorner = Instance.new("UICorner")
-heightSliderBackgroundCorner.CornerRadius = UDim.new(0, 5)
-heightSliderBackgroundCorner.Parent = heightSliderBackground
-
--- 添加高度調整進度條前景
-local heightSlider = Instance.new("Frame")
-heightSlider.Name = "HeightSlider"
-heightSlider.Size = UDim2.new(0.5, 0, 1, 0) -- 初始值為50% (200)
-heightSlider.Position = UDim2.new(0, 0, 0, 0)
-heightSlider.BackgroundColor3 = Color3.fromRGB(80, 180, 255)
-heightSlider.Parent = heightSliderBackground
-
-local heightSliderCorner = Instance.new("UICorner")
-heightSliderCorner.CornerRadius = UDim.new(0, 5)
-heightSliderCorner.Parent = heightSlider
-
--- 添加高度調整進度條按鈕
-local heightSliderButton = Instance.new("TextButton")
-heightSliderButton.Name = "HeightSliderButton"
-heightSliderButton.Size = UDim2.new(0, 20, 0, 20)
-heightSliderButton.Position = UDim2.new(0.5, -10, 0, -5) -- 初始位置對應50%
-heightSliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-heightSliderButton.Text = ""
-heightSliderButton.Parent = heightSliderBackground
-
-local heightSliderButtonCorner = Instance.new("UICorner")
-heightSliderButtonCorner.CornerRadius = UDim.new(0, 10)
-heightSliderButtonCorner.Parent = heightSliderButton
-
 -- 控制变量
 local isMoving = false
 local moveConnection = nil
-local currentHeight = 200 -- 初始高度
-local isDragging = false
-
--- 更新高度顯示
-local function updateHeightDisplay()
-    heightLabel.Text = "高度: " .. tostring(currentHeight)
-    
-    -- 更新進度條視覺
-    local percentage = (currentHeight - 100) / 300 -- 將100-400映射到0-1
-    heightSlider.Size = UDim2.new(percentage, 0, 1, 0)
-    heightSliderButton.Position = UDim2.new(percentage, -10, 0, -5)
-end
-
--- 高度調整功能
-heightSliderButton.MouseButton1Down:Connect(function()
-    isDragging = true
-end)
-
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = false
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local mousePos = game:GetService("UserInputService"):GetMouseLocation()
-        local sliderPos = heightSliderBackground.AbsolutePosition
-        local sliderSize = heightSliderBackground.AbsoluteSize
-        
-        -- 計算滑塊位置百分比
-        local x = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-        
-        -- 將百分比轉換為高度值 (100-400)
-        currentHeight = math.floor(100 + (x * 300))
-        
-        -- 更新顯示
-        updateHeightDisplay()
-        
-        -- 如果正在移動，立即應用新高度
-        if isMoving and Player.Character then
-            local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                local currentPos = humanoidRootPart.Position
-                humanoidRootPart.CFrame = CFrame.new(currentPos.X, currentHeight, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
-            end
-        end
-    end
-end)
-
--- 點擊滑軌也可以調整高度
-heightSliderBackground.MouseButton1Down:Connect(function()
-    isDragging = true
-    -- 直接觸發一次輸入改變事件
-    local mousePos = game:GetService("UserInputService"):GetMouseLocation()
-    local sliderPos = heightSliderBackground.AbsolutePosition
-    local sliderSize = heightSliderBackground.AbsoluteSize
-    
-    -- 計算滑塊位置百分比
-    local x = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-    
-    -- 將百分比轉換為高度值 (100-400)
-    currentHeight = math.floor(100 + (x * 300))
-    
-    -- 更新顯示
-    updateHeightDisplay()
-    
-    -- 如果正在移動，立即應用新高度
-    if isMoving and Player.Character then
-        local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local currentPos = humanoidRootPart.Position
-            humanoidRootPart.CFrame = CFrame.new(currentPos.X, currentHeight, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
-        end
-    end
-end)
 
 -- 移動功能
 teleportButton.MouseButton1Click:Connect(function()
@@ -221,9 +97,13 @@ teleportButton.MouseButton1Click:Connect(function()
     
     -- 獲取當前位置
     local currentPos = humanoidRootPart.Position
+    local currentCFrame = humanoidRootPart.CFrame
     
-    -- 執行初始位置設定 (使用當前高度，並旋轉90度)
-    humanoidRootPart.CFrame = CFrame.new(currentPos.X, currentHeight, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+    -- 向左旋轉90度（使船頭朝向移動方向的右側）
+    local rotatedCFrame = currentCFrame * CFrame.Angles(0, math.rad(90), 0)
+    
+    -- 執行初始位置設定 (高度200，並旋轉90度)
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
     
     -- 持續移動
     moveConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
@@ -238,8 +118,8 @@ teleportButton.MouseButton1Click:Connect(function()
             -- 計算新的X位置，速度為300每秒，向負方向移動
             local newX = currentPos.X - (300 * deltaTime)
             
-            -- 設置新位置 (保持Z不變，使用當前高度，X軸負方向移動，保持旋轉)
-            hrp.CFrame = CFrame.new(newX, currentHeight, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+            -- 設置新位置 (保持Z不變，高度200，X軸負方向移動，保持旋轉)
+            hrp.CFrame = CFrame.new(newX, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
         end
     end)
 end)
@@ -264,6 +144,3 @@ end)
 IconButton.MouseButton1Click:Connect(function()
     Panel.Visible = not Panel.Visible
 end)
-
--- 初始化高度顯示
-updateHeightDisplay()
