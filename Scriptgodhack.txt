@@ -45,74 +45,68 @@ local PanelCorner = Instance.new("UICorner")
 PanelCorner.CornerRadius = UDim.new(0.05, 0)
 PanelCorner.Parent = Panel
 
--- 添加传送按钮
-local teleportButton = Instance.new("TextButton")
-teleportButton.Name = "TeleportButton"
-teleportButton.Size = UDim2.new(0, 150, 0, 40)
-teleportButton.Position = UDim2.new(0, 20, 0, 20)
-teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-teleportButton.Text = "传送到 (9999,0,9999)"
-teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportButton.Parent = Panel
-
--- 添加停止按钮
-local stopButton = Instance.new("TextButton")
-stopButton.Name = "StopButton"
-stopButton.Size = UDim2.new(0, 150, 0, 40)
-stopButton.Position = UDim2.new(0, 20, 0, 70)
-stopButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
-stopButton.Text = "停止传送"
-stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopButton.Parent = Panel
-
 -- 控制变量
-local isTeleporting = false
-local teleportConnection = nil
+local isMoving = false
+local moveConnection = nil
+local moveSpeed = 50 -- 移動速度
 
--- 传送功能
+-- 移動功能 - 先將Y座標設為80，再持續向前移動
 teleportButton.MouseButton1Click:Connect(function()
     if not Player.Character then return end
     
     local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
     if not humanoidRootPart then return end
     
-    isTeleporting = true
+    -- 先將Y座標設為80
+    humanoidRootPart.CFrame = CFrame.new(
+        humanoidRootPart.Position.X,
+        80,
+        humanoidRootPart.Position.Z
+    )
+    
+    isMoving = true
     
     game.StarterGui:SetCore("SendNotification", {
-        Title = "传送中",
-        Text = "正在传送...",
+        Title = "移動中",
+        Text = "高度已調整為80，正在持續移動...",
         Duration = 3
     })
     
-    -- 执行传送
-    humanoidRootPart.CFrame = CFrame.new(100000, 0, 0)
-    
-    -- 可选：持续传送（防止掉下来）
-    teleportConnection = game:GetService("RunService").Heartbeat:Connect(function()
-        if not isTeleporting or not Player.Character then
-            teleportConnection:Disconnect()
+    -- 持續移動
+    moveConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if not isMoving or not Player.Character then
+            moveConnection:Disconnect()
             return
         end
         
         local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
-            hrp.CFrame = CFrame.new(100000, 0, 0)
+            -- 持續向X軸正方向移動
+            hrp.Velocity = Vector3.new(moveSpeed, 0, 0)
         end
     end)
 end)
 
 -- 停止功能
 stopButton.MouseButton1Click:Connect(function()
-    isTeleporting = false
+    isMoving = false
     
-    if teleportConnection then
-        teleportConnection:Disconnect()
-        teleportConnection = nil
+    if moveConnection then
+        moveConnection:Disconnect()
+        moveConnection = nil
+    end
+    
+    -- 停止角色移動
+    if Player.Character then
+        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.Velocity = Vector3.new(0, 0, 0)
+        end
     end
     
     game.StarterGui:SetCore("SendNotification", {
         Title = "已停止",
-        Text = "传送已停止",
+        Text = "移動已停止",
         Duration = 3
     })
 end)
