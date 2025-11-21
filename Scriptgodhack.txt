@@ -1,5 +1,17 @@
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
+
+-- 檢查是否成功獲取本地玩家
+if not Player then
+    warn("無法找到玩家。請確保您在客戶端運行腳本。")
+    return
+end
+
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- 顯示通知（加載時自動顯示）
@@ -106,7 +118,7 @@ teleportButton.MouseButton1Click:Connect(function()
     humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
     
     -- 持續移動
-    moveConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+    moveConnection = RunService.Heartbeat:Connect(function(deltaTime)
         if not isMoving or not Player.Character then
             moveConnection:Disconnect()
             return
