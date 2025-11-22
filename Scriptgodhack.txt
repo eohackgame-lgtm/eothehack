@@ -43,21 +43,35 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0.2, 0)
 UICorner.Parent = IconButton
 
--- 創建空白面板
-local Panel = Instance.new("Frame")
-Panel.Name = "Panel"
-Panel.Size = UDim2.new(0, 300, 0, 200)
-Panel.Position = UDim2.new(0, 90, 0, 20)
-Panel.BackgroundColor3 = Color3.fromRGB(0,0,0)
-Panel.BackgroundTransparency = 0.1
-Panel.Visible = false
-Panel.Parent = ScreenGui
+-- 創建主面板
+local MainPanel = Instance.new("Frame")
+MainPanel.Name = "MainPanel"
+MainPanel.Size = UDim2.new(0, 300, 0, 200)
+MainPanel.Position = UDim2.new(0, 90, 0, 20)
+MainPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MainPanel.BackgroundTransparency = 0.1
+MainPanel.Visible = false
+MainPanel.Parent = ScreenGui
 
-local PanelCorner = Instance.new("UICorner")
-PanelCorner.CornerRadius = UDim.new(0.05, 0)
-PanelCorner.Parent = Panel
+local MainPanelCorner = Instance.new("UICorner")
+MainPanelCorner.CornerRadius = UDim.new(0.05, 0)
+MainPanelCorner.Parent = MainPanel
 
--- 添加传送按钮
+-- 創建信息頁面面板
+local InfoPanel = Instance.new("Frame")
+InfoPanel.Name = "InfoPanel"
+InfoPanel.Size = UDim2.new(0, 300, 0, 200)
+InfoPanel.Position = UDim2.new(0, 90, 0, 20)
+InfoPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+InfoPanel.BackgroundTransparency = 0.1
+InfoPanel.Visible = false
+InfoPanel.Parent = ScreenGui
+
+local InfoPanelCorner = Instance.new("UICorner")
+InfoPanelCorner.CornerRadius = UDim.new(0.05, 0)
+InfoPanelCorner.Parent = InfoPanel
+
+-- 在主面板添加传送按钮
 local teleportButton = Instance.new("TextButton")
 teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
@@ -66,9 +80,9 @@ teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
 teleportButton.Text = "沿X軸負方向移動 (速度300)"
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.TextScaled = true
-teleportButton.Parent = Panel
+teleportButton.Parent = MainPanel
 
--- 添加停止按钮
+-- 在主面板添加停止按钮
 local stopButton = Instance.new("TextButton")
 stopButton.Name = "StopButton"
 stopButton.Size = UDim2.new(0, 150, 0, 40)
@@ -77,9 +91,44 @@ stopButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
 stopButton.Text = "停止移動"
 stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 stopButton.TextScaled = true
-stopButton.Parent = Panel
+stopButton.Parent = MainPanel
 
--- 为按钮添加圆角
+-- 在主面板添加信息页面按钮（右侧长方形按钮）
+local infoButton = Instance.new("TextButton")
+infoButton.Name = "InfoButton"
+infoButton.Size = UDim2.new(0, 150, 0, 40)
+infoButton.Position = UDim2.new(0, 20, 0, 120)
+infoButton.BackgroundColor3 = Color3.fromRGB(80, 120, 200)
+infoButton.Text = "顯示信息"
+infoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoButton.TextScaled = true
+infoButton.Parent = MainPanel
+
+-- 在信息页面添加返回按钮
+local backButton = Instance.new("TextButton")
+backButton.Name = "BackButton"
+backButton.Size = UDim2.new(0, 150, 0, 40)
+backButton.Position = UDim2.new(0, 20, 0, 120)
+backButton.BackgroundColor3 = Color3.fromRGB(200, 120, 80)
+backButton.Text = "返回主頁"
+backButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+backButton.TextScaled = true
+backButton.Parent = InfoPanel
+
+-- 在信息页面添加信息文本
+local infoText = Instance.new("TextLabel")
+infoText.Name = "InfoText"
+infoText.Size = UDim2.new(0, 260, 0, 100)
+infoText.Position = UDim2.new(0, 20, 0, 20)
+infoText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+infoText.BackgroundTransparency = 0.3
+infoText.Text = "eoHub 信息頁面\n\n版本: 1.0\n功能: 自動移動\n作者: eoHub團隊"
+infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoText.TextScaled = true
+infoText.Font = Enum.Font.Gotham
+infoText.Parent = InfoPanel
+
+-- 为所有按钮添加圆角
 local teleportCorner = Instance.new("UICorner")
 teleportCorner.CornerRadius = UDim.new(0, 8)
 teleportCorner.Parent = teleportButton
@@ -87,6 +136,18 @@ teleportCorner.Parent = teleportButton
 local stopCorner = Instance.new("UICorner")
 stopCorner.CornerRadius = UDim.new(0, 8)
 stopCorner.Parent = stopButton
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 8)
+infoCorner.Parent = infoButton
+
+local backCorner = Instance.new("UICorner")
+backCorner.CornerRadius = UDim.new(0, 8)
+backCorner.Parent = backButton
+
+local infoTextCorner = Instance.new("UICorner")
+infoTextCorner.CornerRadius = UDim.new(0, 8)
+infoTextCorner.Parent = infoText
 
 -- 控制变量
 local isMoving = false
@@ -152,7 +213,20 @@ stopButton.MouseButton1Click:Connect(function()
     })
 end)
 
--- 圖標點擊事件（只顯示面板，不發送通知）
+-- 信息按钮功能
+infoButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    InfoPanel.Visible = true
+end)
+
+-- 返回按钮功能
+backButton.MouseButton1Click:Connect(function()
+    InfoPanel.Visible = false
+    MainPanel.Visible = true
+end)
+
+-- 圖標點擊事件（只顯示主面板，不發送通知）
 IconButton.MouseButton1Click:Connect(function()
-    Panel.Visible = not Panel.Visible
+    MainPanel.Visible = not MainPanel.Visible
+    InfoPanel.Visible = false -- 確保信息面板隱藏
 end)
