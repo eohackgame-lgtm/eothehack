@@ -46,7 +46,7 @@ UICorner.Parent = IconButton
 -- 創建主面板
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 300, 0, 200)
+MainPanel.Size = UDim2.new(0, 300, 0, 250) -- 增加高度以容納新按鈕
 MainPanel.Position = UDim2.new(0, 90, 0, 20)
 MainPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 MainPanel.BackgroundTransparency = 0.1
@@ -104,6 +104,17 @@ infoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 infoButton.TextScaled = true
 infoButton.Parent = MainPanel
 
+-- 在主面板添加逃離功能開關
+local escapeToggle = Instance.new("TextButton")
+escapeToggle.Name = "EscapeToggle"
+escapeToggle.Size = UDim2.new(0, 150, 0, 40)
+escapeToggle.Position = UDim2.new(0, 20, 0, 170)
+escapeToggle.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+escapeToggle.Text = "自動逃離: 開啟"
+escapeToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+escapeToggle.TextScaled = true
+escapeToggle.Parent = MainPanel
+
 -- 在信息页面添加返回按钮
 local backButton = Instance.new("TextButton")
 backButton.Name = "BackButton"
@@ -128,6 +139,20 @@ infoText.TextScaled = true
 infoText.Font = Enum.Font.Gotham
 infoText.Parent = InfoPanel
 
+-- 創建緊急停止按鈕（平時隱藏）
+local emergencyStopButton = Instance.new("TextButton")
+emergencyStopButton.Name = "EmergencyStopButton"
+emergencyStopButton.Size = UDim2.new(0, 200, 0, 80)
+emergencyStopButton.Position = UDim2.new(0.5, -100, 0.5, -40)
+emergencyStopButton.AnchorPoint = Vector2.new(0.5, 0.5)
+emergencyStopButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+emergencyStopButton.Text = "緊急停止\n(血量低於10%自動觸發)"
+emergencyStopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+emergencyStopButton.TextScaled = true
+emergencyStopButton.Visible = false
+emergencyStopButton.ZIndex = 10
+emergencyStopButton.Parent = ScreenGui
+
 -- 为所有按钮添加圆角
 local teleportCorner = Instance.new("UICorner")
 teleportCorner.CornerRadius = UDim.new(0, 8)
@@ -141,6 +166,10 @@ local infoCorner = Instance.new("UICorner")
 infoCorner.CornerRadius = UDim.new(0, 8)
 infoCorner.Parent = infoButton
 
+local escapeToggleCorner = Instance.new("UICorner")
+escapeToggleCorner.CornerRadius = UDim.new(0, 8)
+escapeToggleCorner.Parent = escapeToggle
+
 local backCorner = Instance.new("UICorner")
 backCorner.CornerRadius = UDim.new(0, 8)
 backCorner.Parent = backButton
@@ -149,9 +178,96 @@ local infoTextCorner = Instance.new("UICorner")
 infoTextCorner.CornerRadius = UDim.new(0, 8)
 infoTextCorner.Parent = infoText
 
+local emergencyStopCorner = Instance.new("UICorner")
+emergencyStopCorner.CornerRadius = UDim.new(0, 12)
+emergencyStopCorner.Parent = emergencyStopButton
+
 -- 控制变量
 local isMoving = false
 local moveConnection = nil
+local isEscaping = false
+local escapeConnection = nil
+local isEscapeEnabled = true -- 加載時自動開啟
+local healthCheckConnection = nil
+
+-- 獲取玩家血量函數
+local function getPlayerHealth()
+    if not Player.Character then return 100 end
+    
+    local humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return 100 end
+    
+    return humanoid.Health
+end
+
+-- 逃離功能
+local function startEscape()
+    if isEscaping or not Player.Character then return end
+    
+    isEscaping = true
+    
+    -- 顯示緊急停止按鈕
+    emergencyStopButton.Visible = true
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "自動逃離",
+        Text = "血量低於10%，自動向上逃離！",
+        Duration = 5
+    })
+    
+    -- 執行逃離
+    escapeConnection = RunService.Heartbeat:Connect(function(deltaTime)
+        if not isEscaping or not Player.Character or not isEscapeEnabled then
+            if escapeConnection then
+                escapeConnection:Disconnect()
+                escapeConnection = nil
+            end
+            return
+        end
+        
+        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local currentPos = hrp.Position
+            -- 計算新的Y位置，速度為300每秒，向上移動
+            local newY = currentPos.Y + (300 * deltaTime)
+            
+            -- 設置新位置 (保持X和Z不變，Y軸向上移動)
+            hrp.CFrame = CFrame.new(currentPos.X, newY, currentPos.Z)
+        end
+    end)
+end
+
+-- 停止逃離功能
+local function stopEscape()
+    isEscaping = false
+    emergencyStopButton.Visible = false
+    
+    if escapeConnection then
+        escapeConnection:Disconnect()
+        escapeConnection = nil
+    end
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "逃離停止",
+        Text = "自動逃離已停止",
+        Duration = 3
+    })
+end
+
+-- 血量檢查循環
+healthCheckConnection = RunService.Heartbeat:Connect(function()
+    if not isEscapeEnabled then return end
+    
+    local health = getPlayerHealth()
+    
+    -- 如果血量低於10%且不在逃離狀態，開始逃離
+    if health < 10 and not isEscaping then
+        startEscape()
+    -- 如果血量回到50%以上且在逃離狀態，停止逃離
+    elseif health >= 50 and isEscaping then
+        stopEscape()
+    end
+end)
 
 -- 移動功能
 teleportButton.MouseButton1Click:Connect(function()
@@ -223,6 +339,44 @@ end)
 backButton.MouseButton1Click:Connect(function()
     InfoPanel.Visible = false
     MainPanel.Visible = true
+end)
+
+-- 逃離開關功能
+escapeToggle.MouseButton1Click:Connect(function()
+    isEscapeEnabled = not isEscapeEnabled
+    
+    if isEscapeEnabled then
+        escapeToggle.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+        escapeToggle.Text = "自動逃離: 開啟"
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "自動逃離",
+            Text = "自動逃離功能已開啟",
+            Duration = 3
+        })
+    else
+        escapeToggle.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+        escapeToggle.Text = "自動逃離: 關閉"
+        stopEscape() -- 關閉時也停止當前逃離
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "自動逃離",
+            Text = "自動逃離功能已關閉",
+            Duration = 3
+        })
+    end
+end)
+
+-- 緊急停止按鈕功能
+emergencyStopButton.MouseButton1Click:Connect(function()
+    isEscapeEnabled = false
+    escapeToggle.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+    escapeToggle.Text = "自動逃離: 關閉"
+    stopEscape()
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "緊急停止",
+        Text = "自動逃離功能已手動關閉",
+        Duration = 5
+    })
 end)
 
 -- 圖標點擊事件（只顯示主面板，不發送通知）
