@@ -6,60 +6,28 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
--- 错误处理函数
-local function safeCall(callback, errorMessage)
-    local success, err = pcall(callback)
-    if not success then
-        warn(errorMessage .. ": " .. err)
-        return false
-    end
-    return true
-end
-
--- 安全检查函数
-local function safeTeleport()
-    if not Player or not Player.Character then 
-        return false
-    end
-    
-    local humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
-    local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
-    
-    if not humanoid or not humanoidRootPart then
-        return false
-    end
-    
-    if humanoid.Health <= 0 then
-        return false
-    end
-    
-    return true
-end
-
--- 检查是否成功获取本地玩家
+-- 檢查是否成功獲取本地玩家
 if not Player then
-    warn("无法找到玩家。请确保您在客户端运行脚本。")
+    warn("無法找到玩家。請確保您在客戶端運行腳本。")
     return
 end
 
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- 显示通知（加载时自动显示）
-safeCall(function()
-    PlayerGui:SetCore("SendNotification", {
-        Title = "eoHub",
-        Text = "脚本已加载",
-        Duration = 5
-    })
-end, "通知显示失败")
+-- 顯示通知（加載時自動顯示）
+game.StarterGui:SetCore("SendNotification", {
+    Title = "eoHub",
+    Text = "成功運行，祝你早日被封",
+    Duration = 999
+})
 
--- 创建主屏幕GUI
+-- 創建主屏幕GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SimpleGUI"
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- 创建图标按钮
+-- 創建圖標按鈕
 local IconButton = Instance.new("ImageButton")
 IconButton.Name = "IconButton"
 IconButton.Size = UDim2.new(0, 60, 0, 60)
@@ -70,15 +38,15 @@ IconButton.Image = "rbxassetid://138136991120099"
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.Parent = ScreenGui
 
--- 创建圆角效果
+-- 創建圓角效果
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0.2, 0)
 UICorner.Parent = IconButton
 
--- 创建主面板
+-- 創建主面板
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 300, 0, 220)
+MainPanel.Size = UDim2.new(0, 300, 0, 200)
 MainPanel.Position = UDim2.new(0, 90, 0, 20)
 MainPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 MainPanel.BackgroundTransparency = 0.1
@@ -89,7 +57,7 @@ local MainPanelCorner = Instance.new("UICorner")
 MainPanelCorner.CornerRadius = UDim.new(0.05, 0)
 MainPanelCorner.Parent = MainPanel
 
--- 创建信息页面面板
+-- 創建信息頁面面板
 local InfoPanel = Instance.new("Frame")
 InfoPanel.Name = "InfoPanel"
 InfoPanel.Size = UDim2.new(0, 300, 0, 200)
@@ -109,7 +77,7 @@ teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
 teleportButton.Position = UDim2.new(0, 20, 0, 20)
 teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-teleportButton.Text = "沿X轴负方向移动 (速度300)"
+teleportButton.Text = "沿X軸負方向移動 (速度300)"
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.TextScaled = true
 teleportButton.Parent = MainPanel
@@ -120,32 +88,21 @@ stopButton.Name = "StopButton"
 stopButton.Size = UDim2.new(0, 150, 0, 40)
 stopButton.Position = UDim2.new(0, 20, 0, 70)
 stopButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
-stopButton.Text = "停止移动"
+stopButton.Text = "停止移動"
 stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 stopButton.TextScaled = true
 stopButton.Parent = MainPanel
 
--- 在主面板添加信息页面按钮
+-- 在主面板添加信息页面按钮（右侧长方形按钮）
 local infoButton = Instance.new("TextButton")
 infoButton.Name = "InfoButton"
 infoButton.Size = UDim2.new(0, 150, 0, 40)
 infoButton.Position = UDim2.new(0, 20, 0, 120)
 infoButton.BackgroundColor3 = Color3.fromRGB(80, 120, 200)
-infoButton.Text = "显示信息"
+infoButton.Text = "顯示信息"
 infoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 infoButton.TextScaled = true
 infoButton.Parent = MainPanel
-
--- 在主面板添加关闭按钮
-local closeButton = Instance.new("TextButton")
-closeButton.Name = "CloseButton"
-closeButton.Size = UDim2.new(0, 150, 0, 40)
-closeButton.Position = UDim2.new(0, 20, 0, 170)
-closeButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
-closeButton.Text = "关闭面板"
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.TextScaled = true
-closeButton.Parent = MainPanel
 
 -- 在信息页面添加返回按钮
 local backButton = Instance.new("TextButton")
@@ -153,7 +110,7 @@ backButton.Name = "BackButton"
 backButton.Size = UDim2.new(0, 150, 0, 40)
 backButton.Position = UDim2.new(0, 20, 0, 120)
 backButton.BackgroundColor3 = Color3.fromRGB(200, 120, 80)
-backButton.Text = "返回主页"
+backButton.Text = "返回主頁"
 backButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 backButton.TextScaled = true
 backButton.Parent = InfoPanel
@@ -165,7 +122,7 @@ infoText.Size = UDim2.new(0, 260, 0, 100)
 infoText.Position = UDim2.new(0, 20, 0, 20)
 infoText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 infoText.BackgroundTransparency = 0.3
-infoText.Text = "eoHub 信息页面\n\n版本: 1.1\n功能: 自动移动\n作者: eoHub团队"
+infoText.Text = "eoHub 信息頁面\n\n版本: 1.0\n功能: 自動移動\n作者: eoHub團隊"
 infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
 infoText.TextScaled = true
 infoText.Font = Enum.Font.Gotham
@@ -184,10 +141,6 @@ local infoCorner = Instance.new("UICorner")
 infoCorner.CornerRadius = UDim.new(0, 8)
 infoCorner.Parent = infoButton
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 8)
-closeCorner.Parent = closeButton
-
 local backCorner = Instance.new("UICorner")
 backCorner.CornerRadius = UDim.new(0, 8)
 backCorner.Parent = backButton
@@ -199,143 +152,81 @@ infoTextCorner.Parent = infoText
 -- 控制变量
 local isMoving = false
 local moveConnection = nil
-local lastActivation = 0
-local COOLDOWN = 1 -- 1秒冷却
 
--- 清理函数
-local function cleanup()
-    isMoving = false
-    if moveConnection then
-        moveConnection:Disconnect()
-        moveConnection = nil
-    end
-end
-
--- 移动功能
+-- 移動功能
 teleportButton.MouseButton1Click:Connect(function()
-    safeCall(function()
-        local now = tick()
-        if now - lastActivation < COOLDOWN then
-            PlayerGui:SetCore("SendNotification", {
-                Title = "冷却中",
-                Text = "请稍后再试",
-                Duration = 2
-            })
+    if not Player.Character then return end
+    
+    local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+    
+    isMoving = true
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "移動中",
+        Text = "正在沿X軸負方向移動，速度300...",
+        Duration = 3
+    })
+    
+    -- 獲取當前位置
+    local currentPos = humanoidRootPart.Position
+    local currentCFrame = humanoidRootPart.CFrame
+    
+    -- 向左旋轉90度（使船頭朝向移動方向的右側）
+    local rotatedCFrame = currentCFrame * CFrame.Angles(0, math.rad(90), 0)
+    
+    -- 執行初始位置設定 (高度200，並旋轉90度)
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+    
+    -- 持續移動
+    moveConnection = RunService.Heartbeat:Connect(function(deltaTime)
+        if not isMoving or not Player.Character then
+            moveConnection:Disconnect()
             return
         end
-        lastActivation = now
         
-        if not safeTeleport() then 
-            PlayerGui:SetCore("SendNotification", {
-                Title = "错误",
-                Text = "角色状态异常",
-                Duration = 3
-            })
-            return 
-        end
-        
-        cleanup() -- 先停止之前的移动
-        
-        isMoving = true
-        
-        PlayerGui:SetCore("SendNotification", {
-            Title = "移动中",
-            Text = "正在沿X轴负方向移动，速度300...",
-            Duration = 3
-        })
-        
-        -- 获取当前位置并设置初始位置
-        local humanoidRootPart = Player.Character.HumanoidRootPart
-        local currentPos = humanoidRootPart.Position
-        
-        -- 设置初始位置和旋转
-        Player.Character:SetPrimaryPartCFrame(
-            CFrame.new(currentPos.X, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
-        )
-        
-        -- 持续移动
-        moveConnection = RunService.Heartbeat:Connect(function(deltaTime)
-            if not isMoving or not safeTeleport() then
-                cleanup()
-                return
-            end
-            
-            local hrp = Player.Character.HumanoidRootPart
+        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
             local currentPos = hrp.Position
+            -- 計算新的X位置，速度為300每秒，向負方向移動
             local newX = currentPos.X - (300 * deltaTime)
             
-            -- 设置新位置
-            Player.Character:SetPrimaryPartCFrame(
-                CFrame.new(newX, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
-            )
-        end)
-    end, "移动功能出错")
+            -- 設置新位置 (保持Z不變，高度200，X軸負方向移動，保持旋轉)
+            hrp.CFrame = CFrame.new(newX, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+        end
+    end)
 end)
 
 -- 停止功能
 stopButton.MouseButton1Click:Connect(function()
-    safeCall(function()
-        cleanup()
-        
-        PlayerGui:SetCore("SendNotification", {
-            Title = "已停止",
-            Text = "移动已停止",
-            Duration = 3
-        })
-    end, "停止功能出错")
+    isMoving = false
+    
+    if moveConnection then
+        moveConnection:Disconnect()
+        moveConnection = nil
+    end
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "已停止",
+        Text = "移動已停止",
+        Duration = 3
+    })
 end)
 
 -- 信息按钮功能
 infoButton.MouseButton1Click:Connect(function()
-    safeCall(function()
-        MainPanel.Visible = false
-        InfoPanel.Visible = true
-    end, "信息面板切换出错")
+    MainPanel.Visible = false
+    InfoPanel.Visible = true
 end)
 
 -- 返回按钮功能
 backButton.MouseButton1Click:Connect(function()
-    safeCall(function()
-        InfoPanel.Visible = false
-        MainPanel.Visible = true
-    end, "返回功能出错")
+    InfoPanel.Visible = false
+    MainPanel.Visible = true
 end)
 
--- 关闭按钮功能
-closeButton.MouseButton1Click:Connect(function()
-    safeCall(function()
-        MainPanel.Visible = false
-        InfoPanel.Visible = false
-    end, "关闭功能出错")
-end)
-
--- 图标点击事件
+-- 圖標點擊事件（只顯示主面板，不發送通知）
 IconButton.MouseButton1Click:Connect(function()
-    safeCall(function()
-        MainPanel.Visible = not MainPanel.Visible
-        InfoPanel.Visible = false
-    end, "图标点击功能出错")
+    MainPanel.Visible = not MainPanel.Visible
+    InfoPanel.Visible = false -- 確保信息面板隱藏
 end)
-
--- 自动清理
-Player.CharacterRemoving:Connect(function()
-    safeCall(cleanup, "角色移除时清理出错")
-end)
-
--- GUI移除时清理
-ScreenGui.AncestryChanged:Connect(function()
-    safeCall(function()
-        if not ScreenGui:IsDescendantOf(game) then
-            cleanup()
-        end
-    end, "GUI移除清理出错")
-end)
-
--- 玩家离开游戏时清理
-Players.PlayerRemoving:Connect(function(leavingPlayer)
-    if leavingPlayer == Player then
-        safeCall(cleanup, "玩家离开时清理出错")
-    end
-end)
-
-warn("eoHub 脚本加载完成 - 版本 1.1")
