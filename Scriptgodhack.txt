@@ -413,8 +413,15 @@ flyToTikiButton.MouseButton1Click:Connect(function()
     })
 end)
 
--- 圖標點擊事件（只顯示主面板，不發送通知）
-IconButton.MouseButton1Click:Connect(function()
-    MainPanel.Visible = not MainPanel.Visible
-    InfoPanel.Visible = false -- 確保信息面板隱藏
+-- ========== 飛到Tiki功能代碼結束 ==========
+
+-- 飛到Tiki按鈕的點擊事件
+flyToTikiButton.MouseButton1Click:Connect(function()
+    startFlyToTiki()
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "提示",
+        Text = "正在飛往 Tiki 島...",
+        Duration = 3
+    })
 end)
