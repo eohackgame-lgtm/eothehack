@@ -252,7 +252,7 @@ local isFlyingToTiki = false
 local flyConnection = nil
 local targetX = -16542  -- Tiki島X座標
 local targetZ = 1044    -- Tiki島Z座標
-local targetY = 500     -- 飛行高度
+local targetY = 800     -- 飛行高度改為800
 
 -- 檢查是否到達目標位置
 local function hasReachedTarget(currentPos)
@@ -302,16 +302,15 @@ local function startFlyToTiki()
     -- 顯示開始通知
     game.StarterGui:SetCore("SendNotification", {
         Title = "飛往 Tiki 島",
-        Text = "正在起飛到高度 500...",
+        Text = "正在上升至高度 800...",
         Duration = 3
     })
     
     isFlyingToTiki = true
     local isDescending = false
-    local currentPos = humanoidRootPart.Position
-    
-    -- 第一步：先上升到 Y=500
-    humanoidRootPart.CFrame = CFrame.new(currentPos.X, targetY, currentPos.Z)
+    local isAscending = false
+    local ascendSpeed = 200  -- 上升速度
+    local descendSpeed = 150  -- 下降速度
     
     -- 飛行循環
     flyConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -334,7 +333,25 @@ local function startFlyToTiki()
         
         local currentPos = hrp.Position
         
-        if not isDescending then
+        if not isAscending then
+            -- 上升階段
+            if currentPos.Y >= targetY then
+                -- 已經到達目標高度
+                isAscending = true
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "高度已達",
+                    Text = "已到達高度800，開始水平飛行...",
+                    Duration = 3
+                })
+            else
+                -- 繼續上升
+                local newY = currentPos.Y + ascendSpeed * deltaTime
+                if newY > targetY then
+                    newY = targetY
+                end
+                hrp.CFrame = CFrame.new(currentPos.X, newY, currentPos.Z)
+            end
+        elseif not isDescending then
             -- 水平飛行階段
             if hasReachedTarget(currentPos) then
                 -- 到達目標位置，開始下降
@@ -362,7 +379,7 @@ local function startFlyToTiki()
                         local newX = currentPos.X + horizontalDirection.X * moveDistance
                         local newZ = currentPos.Z + horizontalDirection.Z * moveDistance
                         
-                        -- 移動到新位置（保持高度500）
+                        -- 移動到新位置（保持高度800）
                         hrp.CFrame = CFrame.new(newX, targetY, newZ)
                     end
                 end
@@ -388,7 +405,6 @@ local function startFlyToTiki()
                 })
             else
                 -- 繼續下降
-                local descendSpeed = 100  -- 下降速度
                 local newY = currentPos.Y - descendSpeed * deltaTime
                 
                 if newY < groundY then
@@ -400,7 +416,6 @@ local function startFlyToTiki()
         end
     end)
 end
-
 -- ========== 飛到Tiki功能代碼結束 ==========
 
 -- 飛到Tiki按鈕的點擊事件
