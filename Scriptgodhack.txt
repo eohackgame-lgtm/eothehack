@@ -256,6 +256,7 @@ local initialY = 500    -- 初始飛行高度
 local finalY = 800      -- 最終飛行高度
 local targetY = initialY -- 當前目標高度
 local flightPhase = "ascending" -- 飛行階段: "ascending", "waiting", "ascendingTo800", "horizontal", "descending"
+local waitTimer = 0
 
 -- 檢查是否到達目標位置
 local function hasReachedTarget(currentPos)
@@ -306,6 +307,7 @@ local function startFlyToTiki()
     isFlyingToTiki = true
     flightPhase = "ascending"
     targetY = initialY
+    waitTimer = 0
     
     -- 顯示開始通知
     game.StarterGui:SetCore("SendNotification", {
@@ -314,12 +316,9 @@ local function startFlyToTiki()
         Duration = 3
     })
     
-    local isDescending = false
     local currentPos = humanoidRootPart.Position
-    local waitTimer = 0
-    local hasWaited = false
     
-    -- 第一步：先上升到 Y=500
+    -- 第一步：立即上升到 Y=500
     humanoidRootPart.CFrame = CFrame.new(currentPos.X, targetY, currentPos.Z)
     
     -- 飛行循環
@@ -347,7 +346,6 @@ local function startFlyToTiki()
         if flightPhase == "ascending" then
             -- 已經在500高度，切換到等待階段
             flightPhase = "waiting"
-            waitTimer = 0
             
             game.StarterGui:SetCore("SendNotification", {
                 Title = "等待中",
@@ -386,7 +384,6 @@ local function startFlyToTiki()
             if hasReachedTarget(currentPos) then
                 -- 到達目標位置，開始下降
                 flightPhase = "descending"
-                isDescending = true
                 
                 game.StarterGui:SetCore("SendNotification", {
                     Title = "到達 Tiki 島",
@@ -403,41 +400,8 @@ local function startFlyToTiki()
                     horizontalDirection = horizontalDirection.Unit
                     local moveDistance = 300 * deltaTime
                     
-                    -- 障礙物檢測：檢測前方是否有物體
-                    local rayOrigin = Vector3.new(currentPos.X, currentPos.Y, currentPos.Z)
-                    local rayDirection = horizontalDirection * moveDistance * 2  -- 檢測距離是移動距離的2倍
-                    local raycastParams = RaycastParams.new()
-                    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-                    
-                    if Player.Character then
-                        raycastParams.FilterDescendantsInstances = {Player.Character}
-                    end
-                    
-                    -- 發射射線檢測前方障礙物
-                    local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-                    
-                    -- 如果檢測到障礙物，提升高度
-                    if raycastResult then
-                        targetY = targetY + 300
-                        currentPos = hrp.Position  -- 更新當前位置
-                        hrp.CFrame = CFrame.new(currentPos.X, targetY, currentPos.Z)
-                        
-                        game.StarterGui:SetCore("SendNotification", {
-                            Title = "避開障礙物",
-                            Text = "檢測到障礙物，高度提升至 " .. math.floor(targetY),
-                            Duration = 2
-                        })
-                        
-                        -- 重新計算方向（因為位置改變了）
-                        direction = Vector3.new(targetX, targetY, targetZ) - hrp.Position
-                        horizontalDirection = Vector3.new(direction.X, 0, direction.Z)
-                        if horizontalDirection.Magnitude > 0 then
-                            horizontalDirection = horizontalDirection.Unit
-                        end
-                    end
-                    
                     -- 如果剩餘距離小於移動距離，直接跳到目標
-                    if horizontalDirection.Magnitude > 0 and horizontalDirection.Magnitude * moveDistance > direction.Magnitude then
+                    if horizontalDirection.Magnitude * moveDistance > direction.Magnitude then
                         hrp.CFrame = CFrame.new(targetX, targetY, targetZ)
                     else
                         -- 計算新位置
@@ -458,7 +422,6 @@ local function startFlyToTiki()
                 -- 已經接近地面，停止下降
                 hrp.CFrame = CFrame.new(currentPos.X, groundY, currentPos.Z)
                 isFlyingToTiki = false
-                flightPhase = "completed"
                 
                 if flyConnection then
                     flyConnection:Disconnect()
