@@ -246,186 +246,175 @@ IconButton.MouseButton1Click:Connect(function()
     InfoPanel.Visible = false -- 確保信息面板隱藏
 end)
 
--- 飛到Tiki按鈕的點擊事件（留空，讓你之後添加功能）
-flyToTikiButton.MouseButton1Click:Connect(function()
-    -- 飛到 Tiki 島的功能函數
-local function createFlyToTikiButton(parentFrame)
-    -- 創建飛到 Tiki 的按鈕
-    local flyToTikiButton = Instance.new("TextButton")
-    flyToTikiButton.Name = "FlyToTikiButton"
-    flyToTikiButton.Size = UDim2.new(0, 150, 0, 40)
-    flyToTikiButton.Position = UDim2.new(0, 180, 0, 20)  -- 放在主面板右側
-    flyToTikiButton.BackgroundColor3 = Color3.fromRGB(180, 100, 220)
-    flyToTikiButton.Text = "飛到 Tiki 島"
-    flyToTikiButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    flyToTikiButton.TextScaled = true
-    flyToTikiButton.Parent = parentFrame
-    
-    -- 添加圓角
-    local flyToTikiCorner = Instance.new("UICorner")
-    flyToTikiCorner.CornerRadius = UDim.new(0, 8)
-    flyToTikiCorner.Parent = flyToTikiButton
-    
-    -- 飛行控制變量
-    local isFlyingToTiki = false
-    local flyConnection = nil
-    local targetX = -16542  -- Tiki 島 X 座標
-    local targetZ = 1044    -- Tiki 島 Z 座標
-    local targetY = 500     -- 飛行高度
-    
-    -- 檢查是否到達目標位置的函數
-    local function hasReachedTarget(currentPos)
-        local tolerance = 5  -- 容錯範圍
-        return math.abs(currentPos.X - targetX) < tolerance and math.abs(currentPos.Z - targetZ) < tolerance
-    end
-    
-    -- 檢測下方是否有地面的函數
-    local function findGroundBelow(position)
-        local rayOrigin = Vector3.new(position.X, position.Y + 10, position.Z)
-        local rayDirection = Vector3.new(0, -1000, 0)
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-        
-        if Player.Character then
-            raycastParams.FilterDescendantsInstances = {Player.Character}
-        end
-        
-        local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-        
-        if raycastResult then
-            return raycastResult.Position.Y + 5  -- 在地面位置上方5單位
-        end
-        
-        return position.Y - 100  -- 如果沒檢測到，下降100單位
-    end
-    
-    -- 按鈕點擊事件
-    flyToTikiButton.MouseButton1Click:Connect(function()
-        if not Player.Character then 
-            warn("沒有找到玩家角色")
-            return 
-        end
-        
-        local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
-        if not humanoidRootPart then 
-            warn("沒有找到 HumanoidRootPart")
-            return 
-        end
-        
-        -- 如果正在飛行，先停止
-        if isFlyingToTiki and flyConnection then
-            flyConnection:Disconnect()
-            isFlyingToTiki = false
-            flyConnection = nil
-        end
-        
-        -- 顯示開始通知
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "飛往 Tiki 島",
-            Text = "正在起飛到高度 500...",
-            Duration = 3
-        })
-        
-        isFlyingToTiki = true
-        local isDescending = false
-        local currentPos = humanoidRootPart.Position
-        
-        -- 第一步：先上升到 Y=500
-        humanoidRootPart.CFrame = CFrame.new(currentPos.X, targetY, currentPos.Z)
-        
-        -- 飛行循環
-        flyConnection = RunService.Heartbeat:Connect(function(deltaTime)
-            if not isFlyingToTiki or not Player.Character then
-                if flyConnection then
-                    flyConnection:Disconnect()
-                    flyConnection = nil
-                end
-                return
-            end
-            
-            local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
-            if not hrp then
-                if flyConnection then
-                    flyConnection:Disconnect()
-                    flyConnection = nil
-                end
-                return
-            end
-            
-            local currentPos = hrp.Position
-            
-            if not isDescending then
-                -- 水平飛行階段
-                if hasReachedTarget(currentPos) then
-                    -- 到達目標位置，開始下降
-                    isDescending = true
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "到達 Tiki 島",
-                        Text = "正在下降尋找地面...",
-                        Duration = 3
-                    })
-                else
-                    -- 計算朝向目標的方向
-                    local direction = Vector3.new(targetX, targetY, targetZ) - currentPos
-                    local horizontalDirection = Vector3.new(direction.X, 0, direction.Z)
-                    
-                    if horizontalDirection.Magnitude > 0 then
-                        -- 標準化方向並計算移動距離
-                        horizontalDirection = horizontalDirection.Unit
-                        local moveDistance = 300 * deltaTime
-                        
-                        -- 如果剩餘距離小於移動距離，直接跳到目標
-                        if horizontalDirection.Magnitude * moveDistance > direction.Magnitude then
-                            hrp.CFrame = CFrame.new(targetX, targetY, targetZ)
-                        else
-                            -- 計算新位置
-                            local newX = currentPos.X + horizontalDirection.X * moveDistance
-                            local newZ = currentPos.Z + horizontalDirection.Z * moveDistance
-                            
-                            -- 移動到新位置（保持高度500）
-                            hrp.CFrame = CFrame.new(newX, targetY, newZ)
-                        end
-                    end
-                end
-            else
-                -- 下降階段
-                local groundY = findGroundBelow(currentPos)
-                
-                if math.abs(currentPos.Y - groundY) < 2 then
-                    -- 已經接近地面，停止下降
-                    hrp.CFrame = CFrame.new(currentPos.X, groundY, currentPos.Z)
-                    isFlyingToTiki = false
-                    
-                    if flyConnection then
-                        flyConnection:Disconnect()
-                        flyConnection = nil
-                    end
-                    
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "成功著陸",
-                        Text = "已到達 Tiki 島地面",
-                        Duration = 3
-                    })
-                else
-                    -- 繼續下降
-                    local descendSpeed = 100  -- 下降速度
-                    local newY = currentPos.Y - descendSpeed * deltaTime
-                    
-                    if newY < groundY then
-                        newY = groundY
-                    end
-                    
-                    hrp.CFrame = CFrame.new(currentPos.X, newY, currentPos.Z)
-                end
-            end
-        end)
-    end)
-    
-    return flyToTikiButton
+-- ========== 飛到Tiki功能代碼開始 ==========
+-- 飛行控制變量（飛到Tiki）
+local isFlyingToTiki = false
+local flyConnection = nil
+local targetX = -16542  -- Tiki島X座標
+local targetZ = 1044    -- Tiki島Z座標
+local targetY = 500     -- 飛行高度
+
+-- 檢查是否到達目標位置
+local function hasReachedTarget(currentPos)
+    local tolerance = 5  -- 容錯範圍
+    return math.abs(currentPos.X - targetX) < tolerance and math.abs(currentPos.Z - targetZ) < tolerance
 end
+
+-- 檢測下方是否有地面
+local function findGroundBelow(position)
+    local rayOrigin = Vector3.new(position.X, position.Y + 10, position.Z)
+    local rayDirection = Vector3.new(0, -1000, 0)
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    
+    if Player.Character then
+        raycastParams.FilterDescendantsInstances = {Player.Character}
+    end
+    
+    local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+    
+    if raycastResult then
+        return raycastResult.Position.Y + 5  -- 在地面位置上方5單位
+    end
+    
+    return position.Y - 100  -- 如果沒檢測到，下降100單位
+end
+
+-- 飛行功能
+local function startFlyToTiki()
+    if not Player.Character then 
+        warn("沒有找到玩家角色")
+        return 
+    end
+    
+    local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then 
+        warn("沒有找到 HumanoidRootPart")
+        return 
+    end
+    
+    -- 如果正在飛行，先停止
+    if isFlyingToTiki and flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    
+    -- 顯示開始通知
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "飛往 Tiki 島",
+        Text = "正在起飛到高度 500...",
+        Duration = 3
+    })
+    
+    isFlyingToTiki = true
+    local isDescending = false
+    local currentPos = humanoidRootPart.Position
+    
+    -- 第一步：先上升到 Y=500
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, targetY, currentPos.Z)
+    
+    -- 飛行循環
+    flyConnection = RunService.Heartbeat:Connect(function(deltaTime)
+        if not isFlyingToTiki or not Player.Character then
+            if flyConnection then
+                flyConnection:Disconnect()
+                flyConnection = nil
+            end
+            return
+        end
+        
+        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            if flyConnection then
+                flyConnection:Disconnect()
+                flyConnection = nil
+            end
+            return
+        end
+        
+        local currentPos = hrp.Position
+        
+        if not isDescending then
+            -- 水平飛行階段
+            if hasReachedTarget(currentPos) then
+                -- 到達目標位置，開始下降
+                isDescending = true
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "到達 Tiki 島",
+                    Text = "正在下降尋找地面...",
+                    Duration = 3
+                })
+            else
+                -- 計算朝向目標的方向
+                local direction = Vector3.new(targetX, targetY, targetZ) - currentPos
+                local horizontalDirection = Vector3.new(direction.X, 0, direction.Z)
+                
+                if horizontalDirection.Magnitude > 0 then
+                    -- 標準化方向並計算移動距離
+                    horizontalDirection = horizontalDirection.Unit
+                    local moveDistance = 300 * deltaTime
+                    
+                    -- 如果剩餘距離小於移動距離，直接跳到目標
+                    if horizontalDirection.Magnitude * moveDistance > direction.Magnitude then
+                        hrp.CFrame = CFrame.new(targetX, targetY, targetZ)
+                    else
+                        -- 計算新位置
+                        local newX = currentPos.X + horizontalDirection.X * moveDistance
+                        local newZ = currentPos.Z + horizontalDirection.Z * moveDistance
+                        
+                        -- 移動到新位置（保持高度500）
+                        hrp.CFrame = CFrame.new(newX, targetY, newZ)
+                    end
+                end
+            end
+        else
+            -- 下降階段
+            local groundY = findGroundBelow(currentPos)
+            
+            if math.abs(currentPos.Y - groundY) < 2 then
+                -- 已經接近地面，停止下降
+                hrp.CFrame = CFrame.new(currentPos.X, groundY, currentPos.Z)
+                isFlyingToTiki = false
+                
+                if flyConnection then
+                    flyConnection:Disconnect()
+                    flyConnection = nil
+                end
+                
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "成功著陸",
+                    Text = "已到達 Tiki 島地面",
+                    Duration = 3
+                })
+            else
+                -- 繼續下降
+                local descendSpeed = 100  -- 下降速度
+                local newY = currentPos.Y - descendSpeed * deltaTime
+                
+                if newY < groundY then
+                    newY = groundY
+                end
+                
+                hrp.CFrame = CFrame.new(currentPos.X, newY, currentPos.Z)
+            end
+        end
+    end)
+end
+-- ========== 飛到Tiki功能代碼結束 ==========
+
+-- 飛到Tiki按鈕的點擊事件
+flyToTikiButton.MouseButton1Click:Connect(function()
+    startFlyToTiki()
+    
     game.StarterGui:SetCore("SendNotification", {
         Title = "提示",
-        Text = "還在測試階段，可能被封",
-        Duration = 5
+        Text = "正在飛往 Tiki 島...",
+        Duration = 3
     })
+end)
+
+-- 圖標點擊事件（只顯示主面板，不發送通知）
+IconButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = not MainPanel.Visible
+    InfoPanel.Visible = false -- 確保信息面板隱藏
 end)
