@@ -252,30 +252,12 @@ local isFlyingToTiki = false
 local flyConnection = nil
 local targetX = -16542  -- Tiki島X座標
 local targetZ = 1044    -- Tiki島Z座標
-local targetY = 800     -- 飛行高度（改為800）
-local ascendSpeed = 200 -- 上升速度
-local flySpeed = 300    -- 飛行速度
-local descendSpeed = 100 -- 下降速度
+local targetY = 500     -- 飛行高度
 
 -- 檢查是否到達目標位置
 local function hasReachedTarget(currentPos)
     local tolerance = 5  -- 容錯範圍
     return math.abs(currentPos.X - targetX) < tolerance and math.abs(currentPos.Z - targetZ) < tolerance
-end
-
--- 檢測前方是否有障礙物
-local function checkObstacleAhead(position, direction)
-    local rayOrigin = position
-    local rayDirection = direction * 50  -- 檢測前方50單位的距離
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-    
-    if Player.Character then
-        raycastParams.FilterDescendantsInstances = {Player.Character}
-    end
-    
-    local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-    return raycastResult
 end
 
 -- 檢測下方是否有地面
@@ -317,21 +299,22 @@ local function startFlyToTiki()
         flyConnection = nil
     end
     
+    -- 重置高度為500（每次飛行都從500開始）
+    local currentTargetY = 500
+    
     -- 顯示開始通知
     game.StarterGui:SetCore("SendNotification", {
         Title = "飛往 Tiki 島",
-        Text = "正在以速度200上升到高度800...",
+        Text = "正在起飛到高度 500...",
         Duration = 3
     })
     
     isFlyingToTiki = true
-    local currentState = "ascending"  -- 狀態：ascending, flying, descending
+    local isDescending = false
     local currentPos = humanoidRootPart.Position
-    local startY = currentPos.Y
     
-    -- 計算上升需要的時間
-    local ascendDistance = targetY - startY
-    local ascendTime = ascendDistance / ascendSpeed
+    -- 第一步：先上升到 Y=500
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, currentTargetY, currentPos.Z)
     
     -- 飛行循環
     flyConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -354,30 +337,11 @@ local function startFlyToTiki()
         
         local currentPos = hrp.Position
         
-        if currentState == "ascending" then
-            -- 上升階段：以速度200上升到目標高度800
-            local newY = currentPos.Y + ascendSpeed * deltaTime
-            
-            if newY >= targetY then
-                -- 達到目標高度，切換到飛行狀態
-                newY = targetY
-                currentState = "flying"
-                
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "上升完成",
-                    Text = "已到達高度800，開始水平飛行...",
-                    Duration = 3
-                })
-            end
-            
-            -- 保持X和Z不變，只改變Y
-            hrp.CFrame = CFrame.new(currentPos.X, newY, currentPos.Z)
-            
-        elseif currentState == "flying" then
+        if not isDescending then
             -- 水平飛行階段
             if hasReachedTarget(currentPos) then
                 -- 到達目標位置，開始下降
-                currentState = "descending"
+                isDescending = true
                 game.StarterGui:SetCore("SendNotification", {
                     Title = "到達 Tiki 島",
                     Text = "正在下降尋找地面...",
@@ -385,38 +349,71 @@ local function startFlyToTiki()
                 })
             else
                 -- 計算朝向目標的方向
-                local direction = Vector3.new(targetX, targetY, targetZ) - currentPos
+                local direction = Vector3.new(targetX, currentTargetY, targetZ) - currentPos
                 local horizontalDirection = Vector3.new(direction.X, 0, direction.Z)
                 
                 if horizontalDirection.Magnitude > 0 then
                     -- 標準化方向並計算移動距離
                     horizontalDirection = horizontalDirection.Unit
-                    local moveDistance = flySpeed * deltaTime
+                    local moveDistance = 300 * deltaTime
                     
-                    -- 檢查前方是否有障礙物
-                    local obstacle = checkObstacleAhead(currentPos, horizontalDirection)
-                    if obstacle then
-                        -- 遇到障礙物，嘗試繞過或提高高度
-                        local newY = currentPos.Y + 50  -- 提高50單位
-                        hrp.CFrame = CFrame.new(currentPos.X, newY, currentPos.Z)
-                        targetY = newY  -- 臨時提高目標高度
-                    else
-                        -- 如果剩餘距離小於移動距離，直接跳到目標
-                        if horizontalDirection.Magnitude * moveDistance > direction.Magnitude then
-                            hrp.CFrame = CFrame.new(targetX, targetY, targetZ)
-                        else
-                            -- 計算新位置
-                            local newX = currentPos.X + horizontalDirection.X * moveDistance
-                            local newZ = currentPos.Z + horizontalDirection.Z * moveDistance
+                    -- 障礙物檢測：檢測前方是否有物體
+                    local rayOrigin = Vector3.new(currentPos.X, currentPos.Y, currentPos.Z)
+                    local rayDirection = horizontalDirection * (moveDistance + 10)  -- 加上10單位緩衝
+                    local raycastParams = RaycastParams.new()
+                    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+                    
+                    if Player.Character then
+                        raycastParams.FilterDescendantsInstances = {Player.Character}
+                    end
+                    
+                    -- 發射射線檢測前方障礙物
+                    local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+                    
+                    -- 如果檢測到障礙物，提升高度
+                    if raycastResult then
+                        -- 檢測是否為地面（避免無止境上升）
+                        local groundCheckRay = workspace:Raycast(
+                            Vector3.new(currentPos.X, currentPos.Y + 10, currentPos.Z),
+                            Vector3.new(0, -1000, 0),
+                            raycastParams
+                        )
+                        
+                        -- 只有在不是地面的情況下才提升高度
+                        if not groundCheckRay or groundCheckRay.Position.Y < currentPos.Y - 50 then
+                            currentTargetY = currentTargetY + 300
+                            hrp.CFrame = CFrame.new(currentPos.X, currentTargetY, currentPos.Z)
                             
-                            -- 移動到新位置（保持高度）
-                            hrp.CFrame = CFrame.new(newX, targetY, newZ)
+                            game.StarterGui:SetCore("SendNotification", {
+                                Title = "避開障礙物",
+                                Text = "檢測到障礙物，高度提升至 " .. math.floor(currentTargetY),
+                                Duration = 2
+                            })
+                            
+                            -- 更新位置
+                            currentPos = hrp.Position
+                            direction = Vector3.new(targetX, currentTargetY, targetZ) - currentPos
+                            horizontalDirection = Vector3.new(direction.X, 0, direction.Z)
+                            if horizontalDirection.Magnitude > 0 then
+                                horizontalDirection = horizontalDirection.Unit
+                            end
                         end
+                    end
+                    
+                    -- 如果剩餘距離小於移動距離，直接跳到目標
+                    if horizontalDirection.Magnitude > 0 and horizontalDirection.Magnitude * moveDistance > direction.Magnitude then
+                        hrp.CFrame = CFrame.new(targetX, currentTargetY, targetZ)
+                    else
+                        -- 計算新位置
+                        local newX = currentPos.X + horizontalDirection.X * moveDistance
+                        local newZ = currentPos.Z + horizontalDirection.Z * moveDistance
+                        
+                        -- 移動到新位置（保持高度currentTargetY）
+                        hrp.CFrame = CFrame.new(newX, currentTargetY, newZ)
                     end
                 end
             end
-            
-        elseif currentState == "descending" then
+        else
             -- 下降階段
             local groundY = findGroundBelow(currentPos)
             
@@ -437,6 +434,7 @@ local function startFlyToTiki()
                 })
             else
                 -- 繼續下降
+                local descendSpeed = 100  -- 下降速度
                 local newY = currentPos.Y - descendSpeed * deltaTime
                 
                 if newY < groundY then
