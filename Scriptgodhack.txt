@@ -425,7 +425,7 @@ local function createFlyToTikiButton(parentFrame)
 end
     game.StarterGui:SetCore("SendNotification", {
         Title = "提示",
-        Text = "飛到Tiki功能尚未實現",
-        Duration = 3
+        Text = "還在測試階段，可能被封",
+        Duration = 5
     })
 end)
