@@ -400,18 +400,6 @@ local function startFlyToTiki()
         end
     end)
 end
--- ========== 飛到Tiki功能代碼結束 ==========
-
--- 飛到Tiki按鈕的點擊事件
-flyToTikiButton.MouseButton1Click:Connect(function()
-    startFlyToTiki()
-    
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "提示",
-        Text = "正在飛往 Tiki 島...",
-        Duration = 3
-    })
-end)
 
 -- ========== 飛到Tiki功能代碼結束 ==========
 
