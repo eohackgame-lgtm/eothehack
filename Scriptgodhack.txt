@@ -77,7 +77,7 @@ teleportButton.Name = "TeleportButton"
 teleportButton.Size = UDim2.new(0, 150, 0, 40)
 teleportButton.Position = UDim2.new(0, 20, 0, 20)
 teleportButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-teleportButton.Text = "沿X軸負方向移動 (速度300)"
+teleportButton.Text = "自動海上飛行(標準位置在司法後面啟飛)"
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.TextScaled = true
 teleportButton.Parent = MainPanel
@@ -133,7 +133,7 @@ infoText.Size = UDim2.new(0, 260, 0, 100)
 infoText.Position = UDim2.new(0, 20, 0, 20)
 infoText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 infoText.BackgroundTransparency = 0.3
-infoText.Text = "eoHub 信息頁面\n\n版本: 1.0\n功能: 自動移動\n作者: eoHub團隊"
+infoText.Text = "eoHub 信息頁面\n\n版本: E1.5\n功能: 自動海上飛行、自動到司法\n作者: eoHub團隊"
 infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
 infoText.TextScaled = true
 infoText.Font = Enum.Font.Gotham
@@ -179,7 +179,7 @@ teleportButton.MouseButton1Click:Connect(function()
     
     game.StarterGui:SetCore("SendNotification", {
         Title = "移動中",
-        Text = "正在沿X軸負方向移動，速度300...",
+        Text = "正在移動，速度300...",
         Duration = 3
     })
     
@@ -190,8 +190,8 @@ teleportButton.MouseButton1Click:Connect(function()
     -- 向左旋轉90度（使船頭朝向移動方向的右側）
     local rotatedCFrame = currentCFrame * CFrame.Angles(0, math.rad(90), 0)
     
-    -- 執行初始位置設定 (高度200，並旋轉90度)
-    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+    -- 執行初始位置設定 (高度180，並旋轉90度)
+    humanoidRootPart.CFrame = CFrame.new(currentPos.X, 180, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
     
     -- 持續移動
     moveConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -206,8 +206,8 @@ teleportButton.MouseButton1Click:Connect(function()
             -- 計算新的X位置，速度為300每秒，向負方向移動
             local newX = currentPos.X - (300 * deltaTime)
             
-            -- 設置新位置 (保持Z不變，高度200，X軸負方向移動，保持旋轉)
-            hrp.CFrame = CFrame.new(newX, 200, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+            -- 設置新位置 (保持Z不變，高度180，X軸負方向移動，保持旋轉)
+            hrp.CFrame = CFrame.new(newX, 180, currentPos.Z) * CFrame.Angles(0, math.rad(90), 0)
         end
     end)
 end)
