@@ -27,6 +27,158 @@ ScreenGui.Name = "SimpleGUI"
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+-- ========== 密碼保護系統開始 ==========
+local password = "eogame1218"  -- 設置密碼 <--- 這裡是密碼設置位置
+
+-- 創建密碼驗證GUI
+local PasswordScreenGui = Instance.new("ScreenGui")
+PasswordScreenGui.Name = "PasswordScreenGui"
+PasswordScreenGui.Parent = PlayerGui
+PasswordScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+PasswordScreenGui.ResetOnSpawn = false
+
+-- 創建黑色背景遮罩
+local BlackOverlay = Instance.new("Frame")
+BlackOverlay.Name = "BlackOverlay"
+BlackOverlay.Size = UDim2.new(1, 0, 1, 0)
+BlackOverlay.Position = UDim2.new(0, 0, 0, 0)
+BlackOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BlackOverlay.BackgroundTransparency = 0.1
+BlackOverlay.BorderSizePixel = 0
+BlackOverlay.Parent = PasswordScreenGui
+
+-- 創建白色長方形密碼按鈕
+local PasswordButton = Instance.new("TextButton")
+PasswordButton.Name = "PasswordButton"
+PasswordButton.Size = UDim2.new(0, 300, 0, 50)
+PasswordButton.Position = UDim2.new(0.5, -150, 0.5, -25)
+PasswordButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+PasswordButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+PasswordButton.Text = "點擊輸入密碼 (密碼: eogame1218)"
+PasswordButton.Font = Enum.Font.Gotham
+PasswordButton.TextScaled = true
+PasswordButton.Parent = BlackOverlay
+
+-- 創建密碼輸入框（初始隱藏）
+local PasswordInputFrame = Instance.new("Frame")
+PasswordInputFrame.Name = "PasswordInputFrame"
+PasswordInputFrame.Size = UDim2.new(0, 350, 0, 200)
+PasswordInputFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
+PasswordInputFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+PasswordInputFrame.BorderSizePixel = 0
+PasswordInputFrame.Visible = false
+PasswordInputFrame.Parent = BlackOverlay
+
+local PasswordInputCorner = Instance.new("UICorner")
+PasswordInputCorner.CornerRadius = UDim.new(0.05, 0)
+PasswordInputCorner.Parent = PasswordInputFrame
+
+-- 密碼輸入標題
+local PasswordTitle = Instance.new("TextLabel")
+PasswordTitle.Name = "PasswordTitle"
+PasswordTitle.Size = UDim2.new(0, 310, 0, 40)
+PasswordTitle.Position = UDim2.new(0, 20, 0, 20)
+PasswordTitle.BackgroundTransparency = 1
+PasswordTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+PasswordTitle.Text = "請輸入密碼以使用 eoHub"
+PasswordTitle.Font = Enum.Font.GothamBold
+PasswordTitle.TextScaled = true
+PasswordTitle.Parent = PasswordInputFrame
+
+-- 密碼輸入框
+local PasswordTextBox = Instance.new("TextBox")
+PasswordTextBox.Name = "PasswordTextBox"
+PasswordTextBox.Size = UDim2.new(0, 310, 0, 40)
+PasswordTextBox.Position = UDim2.new(0, 20, 0, 70)
+PasswordTextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+PasswordTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+PasswordTextBox.Font = Enum.Font.Gotham
+PasswordTextBox.TextScaled = true
+PasswordTextBox.PlaceholderText = "輸入密碼..."
+PasswordTextBox.Text = ""
+PasswordTextBox.Parent = PasswordInputFrame
+
+local PasswordTextBoxCorner = Instance.new("UICorner")
+PasswordTextBoxCorner.CornerRadius = UDim.new(0.05, 0)
+PasswordTextBoxCorner.Parent = PasswordTextBox
+
+-- 確認按鈕
+local ConfirmButton = Instance.new("TextButton")
+ConfirmButton.Name = "ConfirmButton"
+ConfirmButton.Size = UDim2.new(0, 150, 0, 40)
+ConfirmButton.Position = UDim2.new(0, 20, 0, 130)
+ConfirmButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+ConfirmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ConfirmButton.Text = "確認"
+ConfirmButton.Font = Enum.Font.Gotham
+ConfirmButton.TextScaled = true
+ConfirmButton.Parent = PasswordInputFrame
+
+local ConfirmButtonCorner = Instance.new("UICorner")
+ConfirmButtonCorner.CornerRadius = UDim.new(0.05, 0)
+ConfirmButtonCorner.Parent = ConfirmButton
+
+-- 錯誤信息顯示
+local ErrorLabel = Instance.new("TextLabel")
+ErrorLabel.Name = "ErrorLabel"
+ErrorLabel.Size = UDim2.new(0, 310, 0, 30)
+ErrorLabel.Position = UDim2.new(0, 20, 0, 110)
+ErrorLabel.BackgroundTransparency = 1
+ErrorLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+ErrorLabel.Text = ""
+ErrorLabel.Font = Enum.Font.Gotham
+ErrorLabel.TextScaled = true
+ErrorLabel.Visible = false
+ErrorLabel.Parent = PasswordInputFrame
+
+-- 密碼驗證功能
+local function verifyPassword()
+    local inputPassword = PasswordTextBox.Text
+    
+    if inputPassword == password then
+        -- 密碼正確，隱藏密碼保護界面，顯示主GUI圖標
+        PasswordScreenGui:Destroy()
+        ScreenGui.Enabled = true
+        
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "eoHub",
+            Text = "密碼正確！功能已解鎖",
+            Duration = 3
+        })
+    else
+        -- 密碼錯誤
+        ErrorLabel.Text = "密碼錯誤！請重新輸入"
+        ErrorLabel.Visible = true
+        PasswordTextBox.Text = ""
+        
+        -- 錯誤提示後3秒隱藏錯誤信息
+        task.wait(3)
+        ErrorLabel.Visible = false
+    end
+end
+
+-- 白色按鈕點擊事件：顯示密碼輸入框
+PasswordButton.MouseButton1Click:Connect(function()
+    PasswordInputFrame.Visible = true
+    PasswordButton.Visible = false
+end)
+
+-- 確認按鈕點擊事件
+ConfirmButton.MouseButton1Click:Connect(function()
+    verifyPassword()
+end)
+
+-- 回車鍵提交密碼
+PasswordTextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        verifyPassword()
+    end
+end)
+
+-- 初始隱藏主GUI，直到密碼驗證通過
+ScreenGui.Enabled = false
+-- ========== 密碼保護系統結束 ==========
+
 -- 創建圖標按鈕
 local IconButton = Instance.new("ImageButton")
 IconButton.Name = "IconButton"
