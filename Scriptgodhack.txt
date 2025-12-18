@@ -198,7 +198,7 @@ UICorner.Parent = IconButton
 -- 創建主面板 (高度改為400，是原本200的2倍)
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 300, 0, 400)  -- 高度改為400
+MainPanel.Size = UDim2.new(0, 300, 0, 450)  -- 高度改為400
 MainPanel.Position = UDim2.new(0, 90, 0, 20)
 MainPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 MainPanel.BackgroundTransparency = 0.1
@@ -222,6 +222,329 @@ InfoPanel.Parent = ScreenGui
 local InfoPanelCorner = Instance.new("UICorner")
 InfoPanelCorner.CornerRadius = UDim.new(0.05, 0)
 InfoPanelCorner.Parent = InfoPanel
+
+-- ========== 自動戰鬥系統設置開始 ==========
+local FastAttackSettings = {
+    AutoClick = false, -- 默認關閉，需要用戶手動開啟
+    ClickDelay = 0,
+    Team = "Marines", -- 默認海軍，可以修改
+    Distance = 100
+}
+-- ========== 自動戰鬥系統設置結束 ==========
+
+-- 在主面板添加自動戰鬥按钮 (放在飛到Tiki按鈕下方)
+local autoBattleButton = Instance.new("TextButton")
+autoBattleButton.Name = "AutoBattleButton"
+autoBattleButton.Size = UDim2.new(0, 150, 0, 40)
+autoBattleButton.Position = UDim2.new(0, 20, 0, 220)
+autoBattleButton.BackgroundColor3 = Color3.fromRGB(220, 150, 80)  -- 橙色系
+autoBattleButton.Text = "自動戰鬥設置"
+autoBattleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoBattleButton.TextScaled = true
+autoBattleButton.Parent = MainPanel
+
+local autoBattleCorner = Instance.new("UICorner")
+autoBattleCorner.CornerRadius = UDim.new(0, 8)
+autoBattleCorner.Parent = autoBattleButton
+
+-- 創建自動戰鬥面板
+local BattlePanel = Instance.new("Frame")
+BattlePanel.Name = "BattlePanel"
+BattlePanel.Size = UDim2.new(0, 300, 0, 300)
+BattlePanel.Position = UDim2.new(0, 90, 0, 20)
+BattlePanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+BattlePanel.BackgroundTransparency = 0.1
+BattlePanel.Visible = false
+BattlePanel.Parent = ScreenGui
+
+local BattlePanelCorner = Instance.new("UICorner")
+BattlePanelCorner.CornerRadius = UDim.new(0.05, 0)
+BattlePanelCorner.Parent = BattlePanel
+
+-- 在自動戰鬥面板添加標題
+local battleTitle = Instance.new("TextLabel")
+battleTitle.Name = "BattleTitle"
+battleTitle.Size = UDim2.new(0, 260, 0, 40)
+battleTitle.Position = UDim2.new(0, 20, 0, 20)
+battleTitle.BackgroundTransparency = 1
+battleTitle.Text = "自動戰鬥設置"
+battleTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+battleTitle.TextScaled = true
+battleTitle.Font = Enum.Font.GothamBold
+battleTitle.Parent = BattlePanel
+
+-- 在自動戰鬥面板添加開關按鈕
+local toggleAutoBattleButton = Instance.new("TextButton")
+toggleAutoBattleButton.Name = "ToggleAutoBattleButton"
+toggleAutoBattleButton.Size = UDim2.new(0, 260, 0, 40)
+toggleAutoBattleButton.Position = UDim2.new(0, 20, 0, 70)
+toggleAutoBattleButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+toggleAutoBattleButton.Text = "關閉自動戰鬥"
+toggleAutoBattleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleAutoBattleButton.TextScaled = true
+toggleAutoBattleButton.Parent = BattlePanel
+
+local toggleAutoBattleCorner = Instance.new("UICorner")
+toggleAutoBattleCorner.CornerRadius = UDim.new(0, 8)
+toggleAutoBattleCorner.Parent = toggleAutoBattleButton
+
+-- 在自動戰鬥面板添加隊伍選擇按鈕
+local teamSelectButton = Instance.new("TextButton")
+teamSelectButton.Name = "TeamSelectButton"
+teamSelectButton.Size = UDim2.new(0, 260, 0, 40)
+teamSelectButton.Position = UDim2.new(0, 20, 0, 120)
+teamSelectButton.BackgroundColor3 = Color3.fromRGB(80, 120, 200)
+teamSelectButton.Text = "隊伍: 海軍"
+teamSelectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teamSelectButton.TextScaled = true
+teamSelectButton.Parent = BattlePanel
+
+local teamSelectCorner = Instance.new("UICorner")
+teamSelectCorner.CornerRadius = UDim.new(0, 8)
+teamSelectCorner.Parent = teamSelectButton
+
+-- 在自動戰鬥面板添加返回按鈕
+local battleBackButton = Instance.new("TextButton")
+battleBackButton.Name = "BattleBackButton"
+battleBackButton.Size = UDim2.new(0, 260, 0, 40)
+battleBackButton.Position = UDim2.new(0, 20, 0, 240)
+battleBackButton.BackgroundColor3 = Color3.fromRGB(200, 120, 80)
+battleBackButton.Text = "返回主頁"
+battleBackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+battleBackButton.TextScaled = true
+battleBackButton.Parent = BattlePanel
+
+local battleBackCorner = Instance.new("UICorner")
+battleBackCorner.CornerRadius = UDim.new(0, 8)
+battleBackCorner.Parent = battleBackButton
+
+-- ========== 自動戰鬥功能代碼開始 ==========
+local _G = _G or getgenv()
+_G.FastAttack = true
+
+local function SafeWaitForChild(parent, childName)
+    local success, result = pcall(function()
+        return parent:WaitForChild(childName)
+    end)
+    if not success or not result then
+        warn("找不到: " .. childName)
+    end
+    return result
+end
+
+local function WaitChilds(path, ...)
+    local last = path
+    for _, child in {...} do
+        last = last:FindFirstChild(child) or SafeWaitForChild(last, child)
+        if not last then break end
+    end
+    return last
+end
+
+local FastAttackModule = {}
+
+FastAttackModule.FastAttack = (function()
+    if getgenv().rz_FastAttack then
+        return getgenv().rz_FastAttack
+    end
+
+    local FastAttack = {
+        Distance = FastAttackSettings.Distance,
+        attackMobs = true,
+        attackPlayers = true,
+        Equipped = nil
+    }
+
+    local RegisterAttack = SafeWaitForChild(WaitChilds(ReplicatedStorage, "Modules", "Net"), "RE/RegisterAttack")
+    local RegisterHit = SafeWaitForChild(WaitChilds(ReplicatedStorage, "Modules", "Net"), "RE/RegisterHit")
+
+    local function IsAlive(character)
+        return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
+    end
+
+    local function ProcessEnemies(OthersEnemies, Folder)
+        local BasePart = nil
+        for _, Enemy in Folder:GetChildren() do
+            local Head = Enemy:FindFirstChild("Head")
+            if Head and IsAlive(Enemy) and Player:DistanceFromCharacter(Head.Position) < FastAttack.Distance then
+                if Enemy ~= Player.Character then
+                    table.insert(OthersEnemies, { Enemy, Head })
+                    BasePart = Head
+                end
+            end
+        end
+        return BasePart
+    end
+
+    function FastAttack:Attack(BasePart, OthersEnemies)
+        if not BasePart or #OthersEnemies == 0 then return end
+        if RegisterAttack and RegisterHit then
+            RegisterAttack:FireServer(FastAttackSettings.ClickDelay or 0)
+            RegisterHit:FireServer(BasePart, OthersEnemies)
+        end
+    end
+
+    function FastAttack:AttackNearest()
+        local OthersEnemies = {}
+        local Enemies = workspace:FindFirstChild("Enemies")
+        local Characters = workspace:FindFirstChild("Characters")
+        
+        if not Enemies or not Characters then return end
+        
+        local Part1 = ProcessEnemies(OthersEnemies, Enemies)
+        local Part2 = ProcessEnemies(OthersEnemies, Characters)
+        if #OthersEnemies > 0 then
+            self:Attack(Part1 or Part2, OthersEnemies)
+        else
+            task.wait(0)
+        end
+    end
+
+    function FastAttack:BladeHits()
+        if not Player.Character then return end
+        local Equipped = IsAlive(Player.Character) and Player.Character:FindFirstChildOfClass("Tool")
+        if Equipped and Equipped.ToolTip ~= "Gun" then
+            self:AttackNearest()
+        else
+            task.wait(0)
+        end
+    end
+
+    local battleLoop = nil
+    
+    function FastAttack:Start()
+        if battleLoop then return end
+        
+        battleLoop = task.spawn(function()
+            while FastAttackSettings.AutoClick do
+                if Player and Player.Character then
+                    self:BladeHits()
+                end
+                task.wait(FastAttackSettings.ClickDelay)
+            end
+            battleLoop = nil
+        end)
+        
+        -- 設置隊伍
+        if FastAttackSettings.Team == "Marines" then
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
+        elseif FastAttackSettings.Team == "Pirates" then
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
+        end
+    end
+    
+    function FastAttack:Stop()
+        FastAttackSettings.AutoClick = false
+        if battleLoop then
+            task.cancel(battleLoop)
+            battleLoop = nil
+        end
+    end
+
+    getgenv().rz_FastAttack = FastAttack
+    return FastAttack
+end)()
+
+-- 自動選擇隊伍功能
+local function setupAutoTeam()
+    task.spawn(function()
+        while task.wait(1) do
+            if not FastAttackSettings.AutoClick then break end
+            
+            local chooseTeam = PlayerGui:FindFirstChild("ChooseTeam", true)
+            local uiController = PlayerGui:FindFirstChild("UIController", true)
+
+            if chooseTeam and chooseTeam.Visible and uiController then
+                for _, v in pairs(getgc(true)) do
+                    if type(v) == "function" and getfenv(v).script == uiController then
+                        local constant = getconstants(v)
+                        pcall(function()
+                            if (constant[1] == "Pirates" or constant[1] == "Marines") and #constant == 1 then
+                                if constant[1] == FastAttackSettings.Team then
+                                    v(FastAttackSettings.Team)
+                                end
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+    end)
+end
+-- ========== 自動戰鬥功能代碼結束 ==========
+
+-- 自動戰鬥按鈕點擊事件
+autoBattleButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    InfoPanel.Visible = false
+    BattlePanel.Visible = true
+end)
+
+-- 戰鬥面板返回按鈕事件
+battleBackButton.MouseButton1Click:Connect(function()
+    BattlePanel.Visible = false
+    MainPanel.Visible = true
+end)
+
+-- 自動戰鬥開關按鈕事件
+toggleAutoBattleButton.MouseButton1Click:Connect(function()
+    FastAttackSettings.AutoClick = not FastAttackSettings.AutoClick
+    
+    if FastAttackSettings.AutoClick then
+        toggleAutoBattleButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+        toggleAutoBattleButton.Text = "開啟自動戰鬥"
+        
+        -- 啟動自動戰鬥
+        if FastAttackModule.FastAttack then
+            FastAttackModule.FastAttack:Start()
+        end
+        
+        -- 啟動自動選擇隊伍
+        setupAutoTeam()
+        
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "自動戰鬥",
+            Text = "自動戰鬥已開啟",
+            Duration = 3
+        })
+    else
+        toggleAutoBattleButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+        toggleAutoBattleButton.Text = "關閉自動戰鬥"
+        
+        -- 停止自動戰鬥
+        if FastAttackModule.FastAttack then
+            FastAttackModule.FastAttack:Stop()
+        end
+        
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "自動戰鬥",
+            Text = "自動戰鬥已關閉",
+            Duration = 3
+        })
+    end
+end)
+
+-- 隊伍選擇按鈕事件
+teamSelectButton.MouseButton1Click:Connect(function()
+    if FastAttackSettings.Team == "Marines" then
+        FastAttackSettings.Team = "Pirates"
+        teamSelectButton.Text = "隊伍: 海盜"
+        teamSelectButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)  -- 紅色系代表海盜
+    else
+        FastAttackSettings.Team = "Marines"
+        teamSelectButton.Text = "隊伍: 海軍"
+        teamSelectButton.BackgroundColor3 = Color3.fromRGB(80, 120, 200)  -- 藍色系代表海軍
+    end
+    
+    -- 立即應用隊伍變更
+    if FastAttackSettings.AutoClick then
+        if FastAttackSettings.Team == "Marines" then
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
+        elseif FastAttackSettings.Team == "Pirates" then
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
+        end
+    end
+end)
 
 -- 在主面板添加传送按钮
 local teleportButton = Instance.new("TextButton")
