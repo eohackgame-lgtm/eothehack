@@ -715,10 +715,60 @@ backButton.MouseButton1Click:Connect(function()
     MainPanel.Visible = true
 end)
 
--- 圖標點擊事件（只顯示主面板，不發送通知）
+
+-- 更新所有面板顯示狀態的函數
+local function updatePanelStatus()
+    -- 根據面板狀態改變圖標顏色
+    if MainPanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(100, 255, 100) -- 綠色表示主面板打開
+    elseif InfoPanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(100, 100, 255) -- 藍色表示信息面板打開
+    elseif BattlePanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(255, 150, 50) -- 橙色表示戰鬥面板打開
+    else
+        IconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- 白色表示所有面板關閉
+        IconButton.BackgroundTransparency = 0.5
+    end
+end
+
+-- 圖標點擊事件（修復版，可以關閉所有面板）
 IconButton.MouseButton1Click:Connect(function()
-    MainPanel.Visible = not MainPanel.Visible
-    InfoPanel.Visible = false -- 確保信息面板隱藏
+    -- 如果任何面板是顯示的，則全部關閉
+    if MainPanel.Visible or InfoPanel.Visible or BattlePanel.Visible then
+        MainPanel.Visible = false
+        InfoPanel.Visible = false
+        BattlePanel.Visible = false
+    else
+        -- 如果所有面板都是隱藏的，則顯示主面板
+        MainPanel.Visible = true
+    end
+    updatePanelStatus() -- 更新圖標狀態
+end)
+
+-- 在其他面板切換事件中也更新狀態
+infoButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    InfoPanel.Visible = true
+    updatePanelStatus()
+end)
+
+backButton.MouseButton1Click:Connect(function()
+    InfoPanel.Visible = false
+    MainPanel.Visible = true
+    updatePanelStatus()
+end)
+
+autoBattleButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    InfoPanel.Visible = false
+    BattlePanel.Visible = true
+    updatePanelStatus()
+end)
+
+battleBackButton.MouseButton1Click:Connect(function()
+    BattlePanel.Visible = false
+    MainPanel.Visible = true
+    updatePanelStatus()
 end)
 
 -- ========== 飛到Tiki功能代碼開始 ==========
