@@ -228,7 +228,7 @@ local FastAttackSettings = {
     AutoClick = false, -- 默認關閉，需要用戶手動開啟
     ClickDelay = 0,
     Team = "Marines", -- 默認海軍，可以修改
-    Distance = 100
+    Distance = 100000
 }
 -- ========== 自動戰鬥系統設置結束 ==========
 
