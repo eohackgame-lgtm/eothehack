@@ -28,7 +28,7 @@ ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- ========== 密碼保護系統開始 ==========
-local password = "eogame1218"  -- 設置密碼 <--- 這裡是密碼設置位置
+local password = "eogame1219"  -- 設置密碼 <--- 這裡是密碼設置位置
 
 -- 創建密碼驗證GUI
 local PasswordScreenGui = Instance.new("ScreenGui")
@@ -228,7 +228,8 @@ local FastAttackSettings = {
     AutoClick = false, -- 默認關閉，需要用戶手動開啟
     ClickDelay = 0,
     Team = "Marines", -- 默認海軍，可以修改
-    Distance = 150
+    Distance = 150,
+    AutoV4 = false -- 新增：自動V4變身開關
 }
 -- ========== 自動戰鬥系統設置結束 ==========
 
@@ -250,7 +251,7 @@ autoBattleCorner.Parent = autoBattleButton
 -- 創建自動戰鬥面板
 local BattlePanel = Instance.new("Frame")
 BattlePanel.Name = "BattlePanel"
-BattlePanel.Size = UDim2.new(0, 300, 0, 300)
+BattlePanel.Size = UDim2.new(0, 300, 0, 350)
 BattlePanel.Position = UDim2.new(0, 90, 0, 20)
 BattlePanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 BattlePanel.BackgroundTransparency = 0.1
@@ -302,6 +303,21 @@ teamSelectButton.Parent = BattlePanel
 local teamSelectCorner = Instance.new("UICorner")
 teamSelectCorner.CornerRadius = UDim.new(0, 8)
 teamSelectCorner.Parent = teamSelectButton
+
+-- 在自動戰鬥面板添加自動V4變身開關按鈕（放在隊伍選擇按鈕下方）
+local autoV4Button = Instance.new("TextButton")
+autoV4Button.Name = "AutoV4Button"
+autoV4Button.Size = UDim2.new(0, 260, 0, 40)
+autoV4Button.Position = UDim2.new(0, 20, 0, 170)
+autoV4Button.BackgroundColor3 = Color3.fromRGB(200, 80, 150)  -- 粉紅色系
+autoV4Button.Text = "自動V4變身: 關閉"
+autoV4Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoV4Button.TextScaled = true
+autoV4Button.Parent = BattlePanel
+
+local autoV4Corner = Instance.new("UICorner")
+autoV4Corner.CornerRadius = UDim.new(0, 8)
+autoV4Corner.Parent = autoV4Button
 
 -- 在自動戰鬥面板添加返回按鈕
 local battleBackButton = Instance.new("TextButton")
@@ -546,6 +562,75 @@ teamSelectButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- ========== 自動V4變身功能代碼開始 ==========
+local v4Loop = nil
+
+local function startAutoV4()
+    if v4Loop then return end
+    
+    v4Loop = task.spawn(function()
+        while FastAttackSettings.AutoV4 do
+            pcall(function()
+                if FastAttackSettings.AutoV4 then
+                    -- 按下Y鍵
+                    VirtualInputManager:SendKeyEvent(true, "Y", false, game)
+                    wait(0.1)
+                    VirtualInputManager:SendKeyEvent(false, "Y", false, game)
+                end
+            end)
+            wait(0.5)  -- 每1/2秒按一次Y鍵
+        end
+        v4Loop = nil
+    end)
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "自動V4變身",
+        Text = "已開啟自動V4變身",
+        Duration = 3
+    })
+end
+
+local function stopAutoV4()
+    FastAttackSettings.AutoV4 = false
+    if v4Loop then
+        task.cancel(v4Loop)
+        v4Loop = nil
+    end
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "自動V4變身",
+        Text = "已關閉自動V4變身",
+        Duration = 3
+    })
+end
+
+-- 自動V4變身按鈕點擊事件
+autoV4Button.MouseButton1Click:Connect(function()
+    FastAttackSettings.AutoV4 = not FastAttackSettings.AutoV4
+    
+    if FastAttackSettings.AutoV4 then
+        autoV4Button.BackgroundColor3 = Color3.fromRGB(80, 200, 150)
+        autoV4Button.Text = "自動V4變身: 開啟"
+        startAutoV4()
+    else
+        autoV4Button.BackgroundColor3 = Color3.fromRGB(200, 80, 150)
+        autoV4Button.Text = "自動V4變身: 關閉"
+        stopAutoV4()
+    end
+end)
+-- ========== 自動V4變身功能代碼結束 ==========
+
+-- 在主面板添加飛到Tiki的按钮 (新增按鈕，放在原按鈕下方)
+local flyToTikiButton = Instance.new("TextButton")
+flyToTikiButton.Name = "FlyToTikiButton"
+flyToTikiButton.Size = UDim2.new(0, 150, 0, 40)
+flyToTikiButton.Position = UDim2.new(0, 20, 0, 170)
+flyToTikiButton.BackgroundColor3 = Color3.fromRGB(180, 100, 220)  -- 紫色系
+flyToTikiButton.Text = "飛到Tiki"
+flyToTikiButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyToTikiButton.TextScaled = true
+flyToTikiButton.Parent = MainPanel
+
 -- 在主面板添加传送按钮
 local teleportButton = Instance.new("TextButton")
 teleportButton.Name = "TeleportButton"
@@ -578,17 +663,6 @@ infoButton.Text = "顯示信息"
 infoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 infoButton.TextScaled = true
 infoButton.Parent = MainPanel
-
--- 在主面板添加飛到Tiki的按钮 (新增按鈕，放在原按鈕下方)
-local flyToTikiButton = Instance.new("TextButton")
-flyToTikiButton.Name = "FlyToTikiButton"
-flyToTikiButton.Size = UDim2.new(0, 150, 0, 40)
-flyToTikiButton.Position = UDim2.new(0, 20, 0, 170)
-flyToTikiButton.BackgroundColor3 = Color3.fromRGB(180, 100, 220)  -- 紫色系
-flyToTikiButton.Text = "飛到Tiki"
-flyToTikiButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyToTikiButton.TextScaled = true
-flyToTikiButton.Parent = MainPanel
 
 -- 在信息页面添加返回按钮
 local backButton = Instance.new("TextButton")
