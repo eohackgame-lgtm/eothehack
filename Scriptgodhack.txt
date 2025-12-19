@@ -308,7 +308,7 @@ teamSelectCorner.Parent = teamSelectButton
 -- 在自動戰鬥面板添加自動V4變身開關按鈕（放在隊伍選擇按鈕下方）
 local autoV4Button = Instance.new("TextButton")
 autoV4Button.Name = "AutoV4Button"
-autoV4Button.Size = UDim2.new(0, 260, 0, 40)
+autoV4Button.Size = UDim2.new(0, 240, 0, 40)
 autoV4Button.Position = UDim2.new(0, 20, 0, 170)
 autoV4Button.BackgroundColor3 = Color3.fromRGB(200, 80, 150)  -- 粉紅色系
 autoV4Button.Text = "自動V4變身: 關閉"
@@ -595,7 +595,7 @@ local function startAutoV4()
                     VirtualInputManager:SendKeyEvent(false, "Y", false, game)
                 end
             end)
-            wait(2)  -- 每2秒執行一次（避免過於頻繁）
+            wait(99)  -- 每2秒執行一次（避免過於頻繁）
         end
         v4Loop = nil
     end)
