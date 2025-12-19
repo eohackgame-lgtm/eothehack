@@ -229,7 +229,8 @@ local FastAttackSettings = {
     ClickDelay = 0,
     Team = "Marines", -- 默認海軍，可以修改
     Distance = 150,
-    AutoV4 = false -- 新增：自動V4變身開關
+    AutoV4 = false, -- 新增：自動V4變身開關
+    AutoKen = false  -- 新增：自動霸氣開關
 }
 -- ========== 自動戰鬥系統設置結束 ==========
 
@@ -251,7 +252,7 @@ autoBattleCorner.Parent = autoBattleButton
 -- 創建自動戰鬥面板
 local BattlePanel = Instance.new("Frame")
 BattlePanel.Name = "BattlePanel"
-BattlePanel.Size = UDim2.new(0, 300, 0, 350)
+BattlePanel.Size = UDim2.new(0, 300, 0, 380)
 BattlePanel.Position = UDim2.new(0, 90, 0, 20)
 BattlePanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
 BattlePanel.BackgroundTransparency = 0.1
@@ -318,6 +319,22 @@ autoV4Button.Parent = BattlePanel
 local autoV4Corner = Instance.new("UICorner")
 autoV4Corner.CornerRadius = UDim.new(0, 8)
 autoV4Corner.Parent = autoV4Button
+
+-- ========== 自動霸氣功能添加到戰鬥面板 ==========
+-- 在戰鬥面板添加自動霸氣按鈕（放在V4按鈕旁邊）
+local autoKenButton = Instance.new("TextButton")
+autoKenButton.Name = "AutoKenButton"
+autoKenButton.Size = UDim2.new(0, 120, 0, 40)  -- 寬度改小
+autoKenButton.Position = UDim2.new(0, 160, 0, 170)  -- 右側位置
+autoKenButton.BackgroundColor3 = Color3.fromRGB(80, 150, 220)  -- 藍色系
+autoKenButton.Text = "自動霸氣: 關閉"
+autoKenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoKenButton.TextScaled = true
+autoKenButton.Parent = BattlePanel
+
+local autoKenCorner = Instance.new("UICorner")
+autoKenCorner.CornerRadius = UDim.new(0, 8)
+autoKenCorner.Parent = autoKenButton
 
 -- 在自動戰鬥面板添加返回按鈕
 local battleBackButton = Instance.new("TextButton")
@@ -562,7 +579,7 @@ teamSelectButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ========== 自動V4變身功能代碼開始 ==========
+-- ========== 優化的自動V4功能代碼開始 ==========
 local v4Loop = nil
 
 local function startAutoV4()
@@ -572,13 +589,13 @@ local function startAutoV4()
         while FastAttackSettings.AutoV4 do
             pcall(function()
                 if FastAttackSettings.AutoV4 then
-                    -- 按下Y鍵
+                    -- 使用虛擬按鍵，但短暫按下（0.1秒）
                     VirtualInputManager:SendKeyEvent(true, "Y", false, game)
-                    wait(0.1)
+                    wait(0.1)  -- 等待0.1秒
                     VirtualInputManager:SendKeyEvent(false, "Y", false, game)
                 end
             end)
-            wait(0.5)  -- 每1/2秒按一次Y鍵
+            wait(2)  -- 每2秒執行一次（避免過於頻繁）
         end
         v4Loop = nil
     end)
@@ -618,7 +635,68 @@ autoV4Button.MouseButton1Click:Connect(function()
         stopAutoV4()
     end
 end)
--- ========== 自動V4變身功能代碼結束 ==========
+-- ========== 優化的自動V4功能代碼結束 ==========
+
+-- ========== 自動霸氣功能代碼開始 ==========
+-- 自動霸氣循環
+local kenLoop = nil
+
+local function startAutoKen()
+    if kenLoop then return end
+    
+    kenLoop = task.spawn(function()
+        while FastAttackSettings.AutoKen do
+            pcall(function()
+                if FastAttackSettings.AutoKen then
+                    ReplicatedStorage.Remotes.CommE:FireServer("Ken", true)
+                end
+            end)
+            wait(1)  -- 每1秒檢查一次
+        end
+        kenLoop = nil
+    end)
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "自動霸氣",
+        Text = "已開啟自動霸氣",
+        Duration = 3
+    })
+end
+
+local function stopAutoKen()
+    FastAttackSettings.AutoKen = false
+    if kenLoop then
+        task.cancel(kenLoop)
+        kenLoop = nil
+    end
+    
+    -- 關閉霸氣
+    pcall(function()
+        ReplicatedStorage.Remotes.CommE:FireServer("Ken", false)
+    end)
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "自動霸氣",
+        Text = "已關閉自動霸氣",
+        Duration = 3
+    })
+end
+
+-- 自動霸氣按鈕點擊事件
+autoKenButton.MouseButton1Click:Connect(function()
+    FastAttackSettings.AutoKen = not FastAttackSettings.AutoKen
+    
+    if FastAttackSettings.AutoKen then
+        autoKenButton.BackgroundColor3 = Color3.fromRGB(80, 200, 220)
+        autoKenButton.Text = "自動霸氣: 開啟"
+        startAutoKen()
+    else
+        autoKenButton.BackgroundColor3 = Color3.fromRGB(80, 150, 220)
+        autoKenButton.Text = "自動霸氣: 關閉"
+        stopAutoKen()
+    end
+end)
+-- ========== 自動霸氣功能代碼結束 ==========
 
 -- 在主面板添加飛到Tiki的按钮 (新增按鈕，放在原按鈕下方)
 local flyToTikiButton = Instance.new("TextButton")
