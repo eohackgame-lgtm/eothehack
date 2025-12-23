@@ -995,36 +995,62 @@ local function setPlayerSpeed(speedValue)
             local humanoid = Player.Character:FindFirstChild("Humanoid")
             if humanoid then
                 humanoid.WalkSpeed = speedValue
+                return true
             end
         end
     end)
+    return false
+end
+
+local function getCurrentWalkSpeed()
+    if Player and Player.Character then
+        local humanoid = Player.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            return humanoid.WalkSpeed
+        end
+    end
+    return 16
 end
 
 local function startSpeedControl()
     if speedLoop then return end
     
+    -- 先獲取並保存原始速度（如果是第一次開啟）
+    if originalWalkSpeed == 16 then
+        originalWalkSpeed = getCurrentWalkSpeed()
+    end
+    
+    -- 立即設置一次速度
+    local speedValue = tonumber(speedTextBox.Text) or 16
+    local success = setPlayerSpeed(speedValue)
+    
+    if success then
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "速度修改",
+            Text = "已开启速度修改，当前速度: " .. speedValue,
+            Duration = 3
+        })
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "速度修改",
+            Text = "设置速度失败，请确保角色存在",
+            Duration = 3
+        })
+    end
+    
+    -- 啟動循環監控並保持速度
     speedLoop = task.spawn(function()
         while isSpeedEnabled do
             pcall(function()
                 if isSpeedEnabled then
-                    local speedValue = tonumber(speedTextBox.Text)
-                    if speedValue and speedValue > 0 then
-                        setPlayerSpeed(speedValue)
-                    else
-                        setPlayerSpeed(16) -- 默认速度
-                    end
+                    local currentSpeed = tonumber(speedTextBox.Text) or 16
+                    setPlayerSpeed(currentSpeed)
                 end
             end)
-            task.wait(0.1) -- 每0.1秒检查一次
+            task.wait(0.1) -- 每0.1秒檢查一次
         end
         speedLoop = nil
     end)
-    
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "速度修改",
-        Text = "已开启速度修改",
-        Duration = 3
-    })
 end
 
 local function stopSpeedControl()
@@ -1035,20 +1061,24 @@ local function stopSpeedControl()
     end
     
     -- 恢复原始速度
-    pcall(function()
-        if Player and Player.Character then
-            local humanoid = Player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = originalWalkSpeed
-            end
-        end
-    end)
+    local success = setPlayerSpeed(originalWalkSpeed)
     
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "速度修改",
-        Text = "已关闭速度修改",
-        Duration = 3
-    })
+    if success then
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "速度修改",
+            Text = "已关闭速度修改，恢复原始速度: " .. originalWalkSpeed,
+            Duration = 3
+        })
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "速度修改",
+            Text = "恢复速度失败",
+            Duration = 3
+        })
+    end
+    
+    -- 重置為默認值
+    originalWalkSpeed = 16
 end
 
 -- 速度开关按钮点击事件
@@ -1071,16 +1101,26 @@ speedTextBox.FocusLost:Connect(function()
     if isSpeedEnabled then
         local speedValue = tonumber(speedTextBox.Text)
         if speedValue and speedValue > 0 then
-            setPlayerSpeed(speedValue)
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "速度修改",
-                Text = "速度已更新为: " .. speedValue,
-                Duration = 2
-            })
+            local success = setPlayerSpeed(speedValue)
+            if success then
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "速度修改",
+                    Text = "速度已更新为: " .. speedValue,
+                    Duration = 2
+                })
+            end
         else
             speedTextBox.Text = "16"
             setPlayerSpeed(16)
         end
+    end
+end)
+
+-- 確保在遊戲加載時獲取當前速度
+task.spawn(function()
+    task.wait(2) -- 等待角色加載
+    if not isSpeedEnabled then
+        originalWalkSpeed = getCurrentWalkSpeed()
     end
 end)
 -- ========== 速度控制功能代碼結束 ==========
