@@ -698,21 +698,6 @@ autoKenButton.MouseButton1Click:Connect(function()
 end)
 -- ========== 自動霸氣功能代碼結束 ==========
 
--- 在主面板添加速度设置按钮 (放在自动战斗按钮下方)
-local speedButton = Instance.new("TextButton")
-speedButton.Name = "SpeedButton"
-speedButton.Size = UDim2.new(0, 150, 0, 40)
-speedButton.Position = UDim2.new(0, 160, 0, 220)  -- X=160 (右侧)，Y=220 (与自动战斗按钮同一行)
-speedButton.BackgroundColor3 = Color3.fromRGB(100, 180, 255)  -- 蓝色系
-speedButton.Text = "速度设置"
-speedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedButton.TextScaled = true
-speedButton.Parent = MainPanel
-
-local speedCorner = Instance.new("UICorner")
-speedCorner.CornerRadius = UDim.new(0, 8)
-speedCorner.Parent = speedButton
-
 -- 在主面板添加飛到Tiki的按钮 (新增按鈕，放在原按鈕下方)
 local flyToTikiButton = Instance.new("TextButton")
 flyToTikiButton.Name = "FlyToTikiButton"
@@ -767,229 +752,6 @@ backButton.Text = "返回主頁"
 backButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 backButton.TextScaled = true
 backButton.Parent = InfoPanel
-
--- 创建速度设置面板
-local SpeedPanel = Instance.new("Frame")
-SpeedPanel.Name = "SpeedPanel"
-SpeedPanel.Size = UDim2.new(0, 300, 0, 280)
-SpeedPanel.Position = UDim2.new(0, 90, 0, 20)
-SpeedPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
-SpeedPanel.BackgroundTransparency = 0.1
-SpeedPanel.Visible = false
-SpeedPanel.Parent = ScreenGui
-
-local SpeedPanelCorner = Instance.new("UICorner")
-SpeedPanelCorner.CornerRadius = UDim.new(0.05, 0)
-SpeedPanelCorner.Parent = SpeedPanel
-
--- 在速度面板添加标题
-local speedTitle = Instance.new("TextLabel")
-speedTitle.Name = "SpeedTitle"
-speedTitle.Size = UDim2.new(0, 260, 0, 40)
-speedTitle.Position = UDim2.new(0, 20, 0, 20)
-speedTitle.BackgroundTransparency = 1
-speedTitle.Text = "速度设置"
-speedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedTitle.TextScaled = true
-speedTitle.Font = Enum.Font.GothamBold
-speedTitle.Parent = SpeedPanel
-
--- 在速度面板添加开关按钮
-local toggleSpeedButton = Instance.new("TextButton")
-toggleSpeedButton.Name = "ToggleSpeedButton"
-toggleSpeedButton.Size = UDim2.new(0, 260, 0, 40)
-toggleSpeedButton.Position = UDim2.new(0, 20, 0, 70)
-toggleSpeedButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
-toggleSpeedButton.Text = "关闭速度修改"
-toggleSpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleSpeedButton.TextScaled = true
-toggleSpeedButton.Parent = SpeedPanel
-
-local toggleSpeedCorner = Instance.new("UICorner")
-toggleSpeedCorner.CornerRadius = UDim.new(0, 8)
-toggleSpeedCorner.Parent = toggleSpeedButton
-
--- 在速度面板添加速度输入框
-local speedTextBox = Instance.new("TextBox")
-speedTextBox.Name = "SpeedTextBox"
-speedTextBox.Size = UDim2.new(0, 260, 0, 40)
-speedTextBox.Position = UDim2.new(0, 20, 0, 120)
-speedTextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-speedTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedTextBox.Font = Enum.Font.Gotham
-speedTextBox.TextScaled = true
-speedTextBox.PlaceholderText = "输入速度值 (默认: 16)"
-speedTextBox.Text = "16"
-speedTextBox.Parent = SpeedPanel
-
-local speedTextBoxCorner = Instance.new("UICorner")
-speedTextBoxCorner.CornerRadius = UDim.new(0, 8)
-speedTextBoxCorner.Parent = speedTextBox
-
--- 在速度面板添加返回按钮
-local speedBackButton = Instance.new("TextButton")
-speedBackButton.Name = "SpeedBackButton"
-speedBackButton.Size = UDim2.new(0, 260, 0, 40)
-speedBackButton.Position = UDim2.new(0, 20, 0, 180)
-speedBackButton.BackgroundColor3 = Color3.fromRGB(200, 120, 80)
-speedBackButton.Text = "返回主頁"
-speedBackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedBackButton.TextScaled = true
-speedBackButton.Parent = SpeedPanel
-
-local speedBackCorner = Instance.new("UICorner")
-speedBackCorner.CornerRadius = UDim.new(0, 8)
-speedBackCorner.Parent = speedBackButton
-
--- 速度设置相关变量
-local isSpeedEnabled = false
-local originalWalkSpeed = 16
-local speedLoop = nil
-
--- ========== 速度控制功能代码开始 ==========
-local function setPlayerSpeed(speedValue)
-    pcall(function()
-        if Player and Player.Character then
-            local humanoid = Player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = speedValue
-            end
-        end
-    end)
-end
-
-local function startSpeedControl()
-    if speedLoop then return end
-    
-    speedLoop = task.spawn(function()
-        while isSpeedEnabled do
-            pcall(function()
-                if isSpeedEnabled then
-                    local speedValue = tonumber(speedTextBox.Text)
-                    if speedValue and speedValue > 0 then
-                        setPlayerSpeed(speedValue)
-                    else
-                        setPlayerSpeed(16) -- 默认速度
-                    end
-                end
-            end)
-            task.wait(0.1) -- 每0.1秒检查一次
-        end
-        speedLoop = nil
-    end)
-    
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "速度修改",
-        Text = "已开启速度修改",
-        Duration = 3
-    })
-end
-
-local function stopSpeedControl()
-    isSpeedEnabled = false
-    if speedLoop then
-        task.cancel(speedLoop)
-        speedLoop = nil
-    end
-    
-    -- 恢复原始速度
-    pcall(function()
-        if Player and Player.Character then
-            local humanoid = Player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = originalWalkSpeed
-            end
-        end
-    end)
-    
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "速度修改",
-        Text = "已关闭速度修改",
-        Duration = 3
-    })
-end
-
--- 速度开关按钮点击事件
-toggleSpeedButton.MouseButton1Click:Connect(function()
-    isSpeedEnabled = not isSpeedEnabled
-    
-    if isSpeedEnabled then
-        toggleSpeedButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-        toggleSpeedButton.Text = "开启速度修改"
-        startSpeedControl()
-    else
-        toggleSpeedButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
-        toggleSpeedButton.Text = "关闭速度修改"
-        stopSpeedControl()
-    end
-end)
-
--- 速度输入框焦点丢失时更新速度（如果已开启）
-speedTextBox.FocusLost:Connect(function()
-    if isSpeedEnabled then
-        local speedValue = tonumber(speedTextBox.Text)
-        if speedValue and speedValue > 0 then
-            setPlayerSpeed(speedValue)
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "速度修改",
-                Text = "速度已更新为: " .. speedValue,
-                Duration = 2
-            })
-        else
-            speedTextBox.Text = "16"
-            setPlayerSpeed(16)
-        end
-    end
-end)
--- ========== 速度控制功能代码结束 ==========
-
--- 速度设置按钮点击事件
-speedButton.MouseButton1Click:Connect(function()
-    MainPanel.Visible = false
-    InfoPanel.Visible = false
-    BattlePanel.Visible = false
-    SpeedPanel.Visible = true
-    updatePanelStatus() -- 更新图标状态
-end)
-
--- 速度面板返回按钮事件
-speedBackButton.MouseButton1Click:Connect(function()
-    SpeedPanel.Visible = false
-    MainPanel.Visible = true
-    updatePanelStatus() -- 更新图标状态
-end)
-
--- 更新所有面板显示状态的函数
-local function updatePanelStatus()
-    -- 根据面板状态改变图标颜色
-    if MainPanel.Visible then
-        IconButton.BackgroundColor3 = Color3.fromRGB(100, 255, 100) -- 绿色表示主面板打开
-    elseif InfoPanel.Visible then
-        IconButton.BackgroundColor3 = Color3.fromRGB(100, 100, 255) -- 蓝色表示信息面板打开
-    elseif BattlePanel.Visible then
-        IconButton.BackgroundColor3 = Color3.fromRGB(255, 150, 50) -- 橙色表示战斗面板打开
-    elseif SpeedPanel.Visible then
-        IconButton.BackgroundColor3 = Color3.fromRGB(100, 255, 255) -- 青色表示速度面板打开
-    else
-        IconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- 白色表示所有面板关闭
-        IconButton.BackgroundTransparency = 0.5
-    end
-end
-
--- 图标点击事件（修复版，可以关闭所有面板）
-IconButton.MouseButton1Click:Connect(function()
-    -- 如果任何面板是显示的，则全部关闭
-    if MainPanel.Visible or InfoPanel.Visible or BattlePanel.Visible or SpeedPanel.Visible then
-        MainPanel.Visible = false
-        InfoPanel.Visible = false
-        BattlePanel.Visible = false
-        SpeedPanel.Visible = false
-    else
-        -- 如果所有面板都是隐藏的，则显示主面板
-        MainPanel.Visible = true
-    end
-    updatePanelStatus() -- 更新图标状态
-end)
 
 -- 在信息页面添加信息文本
 local infoText = Instance.new("TextLabel")
@@ -1373,4 +1135,242 @@ flyToTikiButton.MouseButton1Click:Connect(function()
         Text = "正在飛往 Tiki 島...",
         Duration = 3
     })
+end)
+
+-- 在主面板添加速度设置按钮 (放在自动战斗按钮下方)
+local speedButton = Instance.new("TextButton")
+speedButton.Name = "SpeedButton"
+speedButton.Size = UDim2.new(0, 150, 0, 40)
+speedButton.Position = UDim2.new(0, 160, 0, 220)  -- X=160 (右侧)，Y=220 (与自动战斗按钮同一行)
+speedButton.BackgroundColor3 = Color3.fromRGB(100, 180, 255)  -- 蓝色系
+speedButton.Text = "速度设置"
+speedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedButton.TextScaled = true
+speedButton.Parent = MainPanel
+
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 8)
+speedCorner.Parent = speedButton
+
+-- 创建速度设置面板
+local SpeedPanel = Instance.new("Frame")
+SpeedPanel.Name = "SpeedPanel"
+SpeedPanel.Size = UDim2.new(0, 300, 0, 280)
+SpeedPanel.Position = UDim2.new(0, 90, 0, 20)
+SpeedPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+SpeedPanel.BackgroundTransparency = 0.1
+SpeedPanel.Visible = false
+SpeedPanel.Parent = ScreenGui
+
+local SpeedPanelCorner = Instance.new("UICorner")
+SpeedPanelCorner.CornerRadius = UDim.new(0.05, 0)
+SpeedPanelCorner.Parent = SpeedPanel
+
+-- 在速度面板添加标题
+local speedTitle = Instance.new("TextLabel")
+speedTitle.Name = "SpeedTitle"
+speedTitle.Size = UDim2.new(0, 260, 0, 40)
+speedTitle.Position = UDim2.new(0, 20, 0, 20)
+speedTitle.BackgroundTransparency = 1
+speedTitle.Text = "速度设置"
+speedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedTitle.TextScaled = true
+speedTitle.Font = Enum.Font.GothamBold
+speedTitle.Parent = SpeedPanel
+
+-- 在速度面板添加开关按钮
+local toggleSpeedButton = Instance.new("TextButton")
+toggleSpeedButton.Name = "ToggleSpeedButton"
+toggleSpeedButton.Size = UDim2.new(0, 260, 0, 40)
+toggleSpeedButton.Position = UDim2.new(0, 20, 0, 70)
+toggleSpeedButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+toggleSpeedButton.Text = "关闭速度修改"
+toggleSpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleSpeedButton.TextScaled = true
+toggleSpeedButton.Parent = SpeedPanel
+
+local toggleSpeedCorner = Instance.new("UICorner")
+toggleSpeedCorner.CornerRadius = UDim.new(0, 8)
+toggleSpeedCorner.Parent = toggleSpeedButton
+
+-- 在速度面板添加速度输入框
+local speedTextBox = Instance.new("TextBox")
+speedTextBox.Name = "SpeedTextBox"
+speedTextBox.Size = UDim2.new(0, 260, 0, 40)
+speedTextBox.Position = UDim2.new(0, 20, 0, 120)
+speedTextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedTextBox.Font = Enum.Font.Gotham
+speedTextBox.TextScaled = true
+speedTextBox.PlaceholderText = "输入速度值 (默认: 16)"
+speedTextBox.Text = "16"
+speedTextBox.Parent = SpeedPanel
+
+local speedTextBoxCorner = Instance.new("UICorner")
+speedTextBoxCorner.CornerRadius = UDim.new(0, 8)
+speedTextBoxCorner.Parent = speedTextBox
+
+-- 在速度面板添加返回按钮
+local speedBackButton = Instance.new("TextButton")
+speedBackButton.Name = "SpeedBackButton"
+speedBackButton.Size = UDim2.new(0, 260, 0, 40)
+speedBackButton.Position = UDim2.new(0, 20, 0, 180)
+speedBackButton.BackgroundColor3 = Color3.fromRGB(200, 120, 80)
+speedBackButton.Text = "返回主頁"
+speedBackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBackButton.TextScaled = true
+speedBackButton.Parent = SpeedPanel
+
+local speedBackCorner = Instance.new("UICorner")
+speedBackCorner.CornerRadius = UDim.new(0, 8)
+speedBackCorner.Parent = speedBackButton
+
+-- 速度设置相关变量
+local isSpeedEnabled = false
+local originalWalkSpeed = 16
+local speedLoop = nil
+
+-- ========== 速度控制功能代码开始 ==========
+local function setPlayerSpeed(speedValue)
+    pcall(function()
+        if Player and Player.Character then
+            local humanoid = Player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = speedValue
+            end
+        end
+    end)
+end
+
+local function startSpeedControl()
+    if speedLoop then return end
+    
+    speedLoop = task.spawn(function()
+        while isSpeedEnabled do
+            pcall(function()
+                if isSpeedEnabled then
+                    local speedValue = tonumber(speedTextBox.Text)
+                    if speedValue and speedValue > 0 then
+                        setPlayerSpeed(speedValue)
+                    else
+                        setPlayerSpeed(16) -- 默认速度
+                    end
+                end
+            end)
+            task.wait(0.1) -- 每0.1秒检查一次
+        end
+        speedLoop = nil
+    end)
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "速度修改",
+        Text = "已开启速度修改",
+        Duration = 3
+    })
+end
+
+local function stopSpeedControl()
+    isSpeedEnabled = false
+    if speedLoop then
+        task.cancel(speedLoop)
+        speedLoop = nil
+    end
+    
+    -- 恢复原始速度
+    pcall(function()
+        if Player and Player.Character then
+            local humanoid = Player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = originalWalkSpeed
+            end
+        end
+    end)
+    
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "速度修改",
+        Text = "已关闭速度修改",
+        Duration = 3
+    })
+end
+
+-- 速度开关按钮点击事件
+toggleSpeedButton.MouseButton1Click:Connect(function()
+    isSpeedEnabled = not isSpeedEnabled
+    
+    if isSpeedEnabled then
+        toggleSpeedButton.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+        toggleSpeedButton.Text = "开启速度修改"
+        startSpeedControl()
+    else
+        toggleSpeedButton.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+        toggleSpeedButton.Text = "关闭速度修改"
+        stopSpeedControl()
+    end
+end)
+
+-- 速度输入框焦点丢失时更新速度（如果已开启）
+speedTextBox.FocusLost:Connect(function()
+    if isSpeedEnabled then
+        local speedValue = tonumber(speedTextBox.Text)
+        if speedValue and speedValue > 0 then
+            setPlayerSpeed(speedValue)
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "速度修改",
+                Text = "速度已更新为: " .. speedValue,
+                Duration = 2
+            })
+        else
+            speedTextBox.Text = "16"
+            setPlayerSpeed(16)
+        end
+    end
+end)
+-- ========== 速度控制功能代码结束 ==========
+
+-- 速度设置按钮点击事件
+speedButton.MouseButton1Click:Connect(function()
+    MainPanel.Visible = false
+    InfoPanel.Visible = false
+    BattlePanel.Visible = false
+    SpeedPanel.Visible = true
+    updatePanelStatus() -- 更新图标状态
+end)
+
+-- 速度面板返回按钮事件
+speedBackButton.MouseButton1Click:Connect(function()
+    SpeedPanel.Visible = false
+    MainPanel.Visible = true
+    updatePanelStatus() -- 更新图标状态
+end)
+
+-- 更新所有面板显示状态的函数
+local function updatePanelStatus()
+    -- 根据面板状态改变图标颜色
+    if MainPanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(100, 255, 100) -- 绿色表示主面板打开
+    elseif InfoPanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(100, 100, 255) -- 蓝色表示信息面板打开
+    elseif BattlePanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(255, 150, 50) -- 橙色表示战斗面板打开
+    elseif SpeedPanel.Visible then
+        IconButton.BackgroundColor3 = Color3.fromRGB(100, 255, 255) -- 青色表示速度面板打开
+    else
+        IconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- 白色表示所有面板关闭
+        IconButton.BackgroundTransparency = 0.5
+    end
+end
+
+-- 图标点击事件（修复版，可以关闭所有面板）
+IconButton.MouseButton1Click:Connect(function()
+    -- 如果任何面板是显示的，则全部关闭
+    if MainPanel.Visible or InfoPanel.Visible or BattlePanel.Visible or SpeedPanel.Visible then
+        MainPanel.Visible = false
+        InfoPanel.Visible = false
+        BattlePanel.Visible = false
+        SpeedPanel.Visible = false
+    else
+        -- 如果所有面板都是隐藏的，则显示主面板
+        MainPanel.Visible = true
+    end
+    updatePanelStatus() -- 更新图标状态
 end)
